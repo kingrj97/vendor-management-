@@ -1,0 +1,287 @@
+<section class="panel">
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <div class="title">
+            <span class="title-icon"><span class="material-symbols-rounded">storefront</span></span>
+            <strong>Vendor Management</strong>
+        </div>
+
+        <span class="sep"></span>
+
+        <div class="tools">
+            <button class="tool dark" [disabled]="exporting()" (click)="exportExcel()">
+                <span class="material-symbols-rounded">download</span>{{ exporting() ? 'Exporting...' : 'Export' }}
+            </button>
+
+            <span class="sep"></span>
+
+            <div class="menu-wrap">
+                <button class="tool chip" (click)="toggleMenu('filter', $event)">
+                    <span class="material-symbols-rounded">filter_alt</span>{{ statusFilter() }}
+                </button>
+                @if (openMenu() === 'filter') {
+                <div class="dropdown" (click)="$event.stopPropagation()">
+                    @for (s of statuses; track s) {
+                    <button class="opt" [class.sel]="statusFilter() === s" (click)="setStatus(s)">{{ s }}</button>
+                    }
+                </div>
+                }
+            </div>
+
+            <!-- Renew Send: only visible when a vendor on the current page is selected -->
+            @if (selectedCount() > 0) {
+            <button class="tool renew" [disabled]="renewing()" (click)="sendRenew()">
+                <span class="material-symbols-rounded">send</span>{{ renewing() ? 'Sending...' : 'Renew Send (' + selectedCount() + ')' }}
+            </button>
+            }
+        </div>
+
+        <div class="search">
+            <input #searchInput type="text" placeholder="Search here... (Ctrl+K)" [value]="query()"
+                (input)="onSearch($event)" />
+            @if (query()) {
+            <button type="button" class="clear-btn" aria-label="Clear search" title="Clear" (click)="clearSearch()">
+                <span class="material-symbols-rounded">close</span>
+            </button>
+            }
+            <span class="material-symbols-rounded">search</span>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-card">
+        <div class="table-wrap">
+            <table class="vendors" [style.min-width.px]="tableWidth">
+                <colgroup>
+                    <col style="width:48px">
+                    @for (c of tableCols; track c.key) {
+                    <col [style.width.px]="c.width">
+                    }
+                </colgroup>
+
+                <thead>
+                    <tr>
+                        <th class="chk">
+                            <input type="checkbox" class="cb" aria-label="Select all vendors on this page"
+                                title="Select all on this page"
+                                [disabled]="!selectablePaged().length"
+                                [checked]="allChecked()" [indeterminate]="someChecked()"
+                                (change)="toggleAll($event)" />
+                        </th>
+                        @for (c of tableCols; track c.key) {
+                        <th [class.center]="c.center" [style.text-align]="c.center ? 'center' : null">{{ colLabel(c.key) }}</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (v of paged(); track v.id) {
+                    <tr [class.selected]="isSelected(v.id)">
+                        <td class="chk">
+                            <input type="checkbox" class="cb" [attr.aria-label]="'Select ' + v.name"
+                                [disabled]="isRenew(v)"
+                                [title]="isRenew(v) ? 'Already renewed' : 'Select ' + v.name"
+                                [checked]="isSelected(v.id)" (change)="toggleOne(v, $event)" />
+                        </td>
+                        @for (c of tableCols; track c.key) {
+                        <td [class.center]="c.center" [style.text-align]="c.center ? 'center' : null">
+                            @switch (c.key) {
+                            @case ('name') {
+                            <!-- name + Renew tag in one flex row, the tag always stays right after the name -->
+                            <div class="name-cell">
+                                <a href="#" class="name-link" (click)="$event.preventDefault(); view(v)">{{ v.name }}</a>
+                                @if (v.status === 'Renew') {
+                                <span class="renew-tag">Renew</span>
+                                }
+                            </div>
+                            }
+                            @case ('status') {
+                            <div class="status-cell">
+
+                                <button type="button" class="st-btn view" title="View all details" (click)="view(v)">
+                                    <span class="material-symbols-rounded">visibility</span>View
+                                </button>
+
+                                <button type="button" class="st-btn approve" title="Approve"
+                                    [disabled]="v.status === 'Approved'" (click)="changeStatus(v, 'Approved')">
+                                    <span class="material-symbols-rounded">check_circle</span>Approve
+                                </button>
+
+                                <button type="button" class="st-btn reject" title="Reject"
+                                    [disabled]="v.status === 'Rejected'" (click)="changeStatus(v, 'Rejected')">
+                                    <span class="material-symbols-rounded">cancel</span>Reject
+                                </button>
+
+                            </div>
+                            }
+                            @default {
+                            {{ cellValue(v, c.key) || '–' }}
+                            }
+                            }
+                        </td>
+                        }
+                    </tr>
+                    }
+                </tbody>
+            </table>
+
+            <!-- Loading / Error / Empty state -->
+            @if (loading()) {
+            <div class="empty-state">
+                <h3>Loading vendors...</h3>
+            </div>
+            } @else if (loadError()) {
+            <div class="empty-state">
+                <h3>{{ loadError() }}</h3>
+                <p><button class="link-btn" (click)="loadVendors()">Retry</button></p>
+            </div>
+            } @else if (!paged().length) {
+            <div class="empty-state">
+                <svg class="empty-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="5"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="37" cy="25" r="16" />
+                    <path d="M49 37 L60 48" stroke-width="6" />
+                    <path d="M6 36 L16 46 M16 36 L6 46" stroke-width="4" />
+                </svg>
+                <h3>No Data found</h3>
+                <p>We couldn't find any records matching your criteria.</p>
+            </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        <div class="pager">
+            <label class="per-page">
+                <span>Vendors pages</span>
+                <select (change)="setPageSize($event)">
+                    @for (s of pageSizes; track s) {
+                    <option [value]="s" [selected]="s === pageSize()">{{ s }}</option>
+                    }
+                </select>
+            </label>
+
+            <span class="range">{{ rangeFrom() }} – {{ rangeTo() }} of {{ total() }}</span>
+
+            <div class="nav">
+                <button class="pg-btn" aria-label="First page" [disabled]="currentPage() === 1" (click)="setPage(1)">
+                    <span class="material-symbols-rounded">first_page</span>
+                </button>
+                <button class="pg-btn" aria-label="Previous page" [disabled]="currentPage() === 1"
+                    (click)="setPage(currentPage() - 1)">
+                    <span class="material-symbols-rounded">chevron_left</span>
+                </button>
+                <button class="pg-btn" aria-label="Next page" [disabled]="currentPage() === totalPages()"
+                    (click)="setPage(currentPage() + 1)">
+                    <span class="material-symbols-rounded">chevron_right</span>
+                </button>
+                <button class="pg-btn" aria-label="Last page" [disabled]="currentPage() === totalPages()"
+                    (click)="setPage(totalPages())">
+                    <span class="material-symbols-rounded">last_page</span>
+                </button>
+            </div>
+
+            <div class="goto">
+                <input #goInput type="number" min="1" [max]="totalPages()" [value]="currentPage()"
+                    aria-label="Page number" (keydown.enter)="goTo(goInput.value)" />
+                <button class="go-btn" (click)="goTo(goInput.value)">Go</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- VENDOR DETAILS POPUP -->
+@if (detail(); as v) {
+<div class="overlay" (click)="closeDetail()"></div>
+
+<div class="modal" role="dialog" aria-modal="true" aria-label="Vendor details" (click)="$event.stopPropagation()">
+    <header class="m-head">
+        <div class="m-title">
+            <h2>{{ v.name }}</h2>
+            <span [class]="'badge ' + statusClass(v.status)">{{ v.status || '–' }}</span>
+        </div>
+        <button class="m-close" aria-label="Close" (click)="closeDetail()">
+            <span class="material-symbols-rounded">close</span>
+        </button>
+    </header>
+
+    <div class="m-tools">
+        <div class="m-search">
+            <span class="material-symbols-rounded">search</span>
+            <input type="text" placeholder="Search fields..." [value]="fieldSearch()" (input)="onFieldSearch($event)" />
+            @if (fieldSearch()) {
+            <button type="button" class="clear-btn" aria-label="Clear" title="Clear" (click)="clearFieldSearch()">
+                <span class="material-symbols-rounded">close</span>
+            </button>
+            }
+        </div>
+        <label class="m-check">
+            <input type="checkbox" [checked]="hideEmpty()" (change)="toggleHideEmpty()" />
+            Hide empty fields
+        </label>
+    </div>
+
+    <div class="m-body">
+        @for (g of detailGroups(); track g.title) {
+        <section class="group">
+            <div class="group-title">{{ g.title }}</div>
+            <div class="grid">
+                @for (f of g.items; track f.key) {
+                <div class="field" [class.full]="f.wrap">
+                    <span class="f-label">{{ f.label }}</span>
+                    <span class="f-value">
+                        @if (f.file) {
+                        @if (f.raw) {
+                        <button type="button" class="file-view" (click)="openPreview(v, f.key)">
+                            <span class="material-symbols-rounded">visibility</span>View
+                        </button>
+                        } @else { – }
+                        } @else {
+                        {{ f.value || '–' }}
+                        }
+                    </span>
+                </div>
+                }
+            </div>
+        </section>
+        } @empty {
+        <div class="none">No fields found</div>
+        }
+    </div>
+</div>
+}
+
+<!-- FILE PREVIEW WINDOW (draggable only from the 6-dot grip) -->
+@if (preview.open) {
+<div class="preview-window" [style.left.px]="preview.x" [style.top.px]="preview.y">
+    <div class="preview-header">
+        <span class="preview-grip" title="Drag to move" (pointerdown)="startDrag($event)"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <span class="preview-title">{{ preview.title }}</span>
+        <button type="button" class="preview-close" title="Close" aria-label="Close preview"
+            (pointerdown)="$event.stopPropagation()" (click)="closePreview()">✕</button>
+    </div>
+
+    <div class="preview-body">
+
+        @if (preview.loading) {
+        <p class="preview-msg">Loading...</p>
+        }
+
+        @if (!preview.loading && !preview.failed) {
+            @if (preview.isPdf) {
+            <iframe [src]="preview.safeUrl" title="PDF preview"></iframe>
+            } @else {
+            <img [src]="preview.url" alt="Preview" draggable="false" (error)="preview.failed = true">
+            }
+        }
+
+        @if (preview.failed) {
+        <p class="preview-fail">
+            Could not load the preview.
+            <a [href]="preview.url" target="_blank">Open in a new tab</a>
+        </p>
+        }
+
+    </div>
+
+    <div class="preview-name">{{ preview.name }}</div>
+</div>
+}

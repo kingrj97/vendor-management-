@@ -1,0 +1,599 @@
+/* =====================================================
+   1. GLOBAL STYLES
+===================================================== */
+
+:host {
+  display: block;
+  min-height: 100vh;
+  min-height: 100dvh;
+
+  font-family: Arial, Helvetica, sans-serif;
+  color: #263449;
+  background: #f1f5f9;
+
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* =====================================================
+   2. LOGIN PAGE BACKGROUND
+===================================================== */
+
+.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+
+  /* safe-area: notch / home bar wale phones ke liye */
+  padding:
+    max(30px, env(safe-area-inset-top, 0px))
+    max(20px, env(safe-area-inset-right, 0px))
+    max(30px, env(safe-area-inset-bottom, 0px))
+    max(20px, env(safe-area-inset-left, 0px));
+
+  background:
+    radial-gradient(
+      circle at 10% 10%,
+      rgba(96, 165, 250, 0.22),
+      transparent 35%
+    ),
+    linear-gradient(
+      135deg,
+      #294875 0%,
+      #365789 55%,
+      #42699d 100%
+    );
+}
+
+.login-wrapper {
+  width: 100%;
+  max-width: 460px;
+  min-width: 0;
+  margin: auto;
+}
+
+/* =====================================================
+   3. LOGIN CARD
+===================================================== */
+
+.login-card {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+
+  background: #ffffff;
+  border: 1px solid #e3eaf3;
+  border-radius: 16px;
+
+  box-shadow:
+    0 24px 55px rgba(15, 23, 42, 0.22),
+    0 5px 15px rgba(15, 23, 42, 0.07);
+}
+
+/* =====================================================
+   4. LOGIN HEADER
+===================================================== */
+
+.login-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  width: 100%;
+  padding: 18px 24px;
+
+  background: #ffffff;
+  border-bottom: 1px solid #e8edf4;
+}
+
+.card-header {
+  flex: 1;
+  min-width: 0;
+
+  padding: 0;
+
+  background: transparent;
+  border: none;
+
+  text-align: left;
+}
+
+/* clamp: chhoti screen par apne aap chhota, badi par 28px */
+.card-header h1 {
+  margin: 0;
+
+  color: #203b62;
+  font-size: clamp(21px, 5.6vw, 28px);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+/* =====================================================
+   5. HOSPITAL LOGO
+===================================================== */
+
+.logo-area {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* logo bhi screen ke hisab se chhota-bada hota hai */
+.hospital-logo {
+  display: block;
+
+  width: clamp(70px, 22vw, 100px);
+  height: auto;
+  max-height: 65px;
+  aspect-ratio: 100 / 65;
+
+  object-fit: contain;
+}
+
+/* =====================================================
+   6. CARD BODY
+===================================================== */
+
+.card-body {
+  padding: 24px 28px 30px;
+}
+
+.card-body h2 {
+  margin: 0 0 14px;
+
+  color: #263449;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+/* =====================================================
+   7. VERIFY MOBILE INSTRUCTION
+===================================================== */
+
+.verify-instruction {
+  margin: 0 0 20px;
+
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+/* =====================================================
+   8. LOGIN FORM PANEL
+===================================================== */
+
+.login-panel {
+  width: 100%;
+  min-width: 0;
+
+  padding: 23px;
+
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 11px;
+}
+
+.form-group {
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 9px;
+
+  color: #34445b;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.required {
+  color: #e5484d;
+  font-weight: 700;
+}
+
+/* =====================================================
+   9. OTP INPUT
+===================================================== */
+
+input {
+  display: block;
+
+  width: 100%;
+  min-width: 0;
+  height: 46px;
+
+  padding: 0 13px;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  outline: none;
+
+  background: #ffffff;
+  color: #263449;
+
+  font-family: inherit;
+  font-size: 14px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+input::placeholder {
+  color: #94a3b8;
+  opacity: 1;
+}
+
+input:hover {
+  border-color: #9fb2ca;
+}
+
+input:focus {
+  border-color: #3189e8;
+  box-shadow: 0 0 0 3px rgba(49, 137, 232, 0.13);
+}
+
+/* =====================================================
+   10. STATUS / ERROR MESSAGES
+===================================================== */
+
+.status-message {
+  margin: 0;
+  padding: 0;
+
+  color: #334155;
+  font-size: 13px;
+  line-height: 1.6;
+
+  overflow-wrap: anywhere;
+}
+
+.status-message.error-message {
+  color: #d32f2f;
+}
+
+/* =====================================================
+   11. LOGIN ACTION BUTTONS
+===================================================== */
+
+.login-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  width: 100%;
+  margin-top: 24px;
+}
+
+.login-button {
+  display: inline-flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 108px;
+  min-height: 44px;
+
+  padding: 10px 22px;
+
+  border: 1px solid #1677df;
+  border-radius: 7px;
+
+  background: #1677df;
+  color: #ffffff;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+  touch-action: manipulation;
+
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.login-button:hover:not(:disabled) {
+  background: #0966c7;
+  box-shadow: 0 4px 12px rgba(22, 119, 223, 0.2);
+}
+
+.login-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.login-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* =====================================================
+   12. RESEND OTP BUTTON
+===================================================== */
+
+.resend-button {
+  display: inline-flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 108px;
+  min-height: 44px;
+
+  padding: 10px 16px;
+
+  border: 1px solid #1a73e8;
+  border-radius: 7px;
+
+  background: transparent;
+  color: #1a73e8;
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+  touch-action: manipulation;
+
+  transition: background 0.2s ease;
+}
+
+.resend-button:hover:not(:disabled) {
+  background: #eff6ff;
+}
+
+.resend-button:disabled {
+  border-color: #bbb;
+  color: #888;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+/* =====================================================
+   13. THANK YOU SECTION
+===================================================== */
+
+.thank-you {
+  padding: 20px 5px;
+  text-align: center;
+}
+
+.thank-you h2 {
+  margin: 0 0 14px;
+
+  color: #2e7d32;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.thank-you p {
+  margin: 8px 0;
+
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.thank-you .login-actions {
+  justify-content: center;
+  margin-top: 25px;
+}
+
+.thank-you .login-button {
+  flex: 0 1 160px;
+}
+
+/* =====================================================
+   14. KEYBOARD ACCESSIBILITY
+===================================================== */
+
+button:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 3px;
+}
+
+/* =====================================================
+   15. TABLET RESPONSIVENESS
+===================================================== */
+
+@media (max-width: 768px) {
+  .login-page {
+    padding:
+      max(26px, env(safe-area-inset-top, 0px))
+      max(18px, env(safe-area-inset-right, 0px))
+      max(26px, env(safe-area-inset-bottom, 0px))
+      max(18px, env(safe-area-inset-left, 0px));
+  }
+
+  .login-wrapper {
+    max-width: 440px;
+  }
+
+  .card-body {
+    padding: 22px;
+  }
+
+  .login-panel {
+    padding: 20px;
+  }
+}
+
+/* =====================================================
+   16. MOBILE RESPONSIVENESS
+===================================================== */
+
+@media (max-width: 480px) {
+  .login-page {
+    padding:
+      max(20px, env(safe-area-inset-top, 0px))
+      max(12px, env(safe-area-inset-right, 0px))
+      max(20px, env(safe-area-inset-bottom, 0px))
+      max(12px, env(safe-area-inset-left, 0px));
+  }
+
+  .login-wrapper {
+    max-width: 100%;
+  }
+
+  .login-card {
+    border-radius: 12px;
+  }
+
+  .login-topbar {
+    gap: 10px;
+    padding: 15px 16px;
+  }
+
+  .card-body {
+    padding: 18px 14px 22px;
+  }
+
+  .card-body h2 {
+    font-size: 17px;
+  }
+
+  .verify-instruction {
+    font-size: 13px;
+  }
+
+  .login-panel {
+    padding: 17px 13px;
+    border-radius: 9px;
+  }
+
+  /* 16px: iPhone par input tap karne par zoom nahi hota */
+  input {
+    height: 46px;
+    font-size: 16px;
+  }
+
+  .login-actions {
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  /* button ka text 12px se 14px: padhne me aasan */
+  .login-button,
+  .resend-button {
+    min-height: 46px;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  .thank-you h2 {
+    font-size: 21px;
+  }
+}
+
+/* =====================================================
+   17. VERY SMALL MOBILE SCREENS
+===================================================== */
+
+@media (max-width: 360px) {
+  .login-page {
+    padding:
+      max(16px, env(safe-area-inset-top, 0px))
+      max(8px, env(safe-area-inset-right, 0px))
+      max(16px, env(safe-area-inset-bottom, 0px))
+      max(8px, env(safe-area-inset-left, 0px));
+  }
+
+  .login-topbar {
+    padding: 14px 12px;
+  }
+
+  .card-body {
+    padding: 16px 10px 20px;
+  }
+
+  .login-panel {
+    padding: 14px 9px;
+  }
+
+  .login-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .login-button,
+  .resend-button {
+    width: 100%;
+    flex: 1 1 auto;
+  }
+
+  .thank-you .login-button {
+    flex: 1 1 auto;
+  }
+}
+
+/* =====================================================
+   18. LANDSCAPE PHONES / SHORT SCREENS
+   Kam height par card upar se start ho, taaki
+   upar ka hissa na kate aur page scroll ho sake.
+===================================================== */
+
+@media (max-height: 560px) {
+  .login-page {
+    align-items: flex-start;
+  }
+
+  .login-topbar {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .card-body {
+    padding-top: 14px;
+    padding-bottom: 18px;
+  }
+
+  .login-panel {
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+
+  .form-group {
+    margin-bottom: 12px;
+  }
+
+  .login-actions {
+    margin-top: 14px;
+  }
+}
+
+/* =====================================================
+   19. REDUCED MOTION
+===================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .login-button,
+  .resend-button,
+  input {
+    transition: none;
+  }
+}

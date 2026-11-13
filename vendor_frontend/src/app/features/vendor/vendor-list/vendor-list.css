@@ -1,0 +1,785 @@
+/* ==================================================
+   1. GLOBAL STYLES
+================================================== */
+
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  color: #263449;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+
+  /* Responsive spacing tokens */
+  --card-pad: clamp(12px, 2.4vw, 24px);
+  --section-pad: clamp(12px, 2.2vw, 22px);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  max-width: 100%;
+}
+
+
+/* ==================================================
+   2. PAGE LAYOUT
+================================================== */
+
+.list-page {
+  width: 100%;
+  max-width: 1400px;
+  min-width: 0;
+  margin: 0 auto;
+}
+
+.state-msg {
+  padding: 40px 12px;
+  color: #66758c;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+
+/* ==================================================
+   3. VENDOR CARD
+================================================== */
+
+.vendor-card {
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 24px;
+  padding: var(--card-pad);
+  background: #ffffff;
+  border: 1px solid #e5eaf1;
+  border-radius: 14px;
+  box-shadow: 0 5px 25px rgba(30, 50, 80, 0.06);
+}
+
+
+/* ==================================================
+   4. CARD HEADER
+================================================== */
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 22px;
+  min-width: 0;
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-width: 0;
+  flex: 1 1 240px;
+}
+
+.card-title h2 {
+  margin: 0;
+  color: #183153;
+  font-size: clamp(16px, 2.4vw, 22px);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+
+/* ==================================================
+   5. VENDOR CODE
+================================================== */
+
+.code-chip {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 3px 10px;
+  background: #eaf1ff;
+  color: #2563eb;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+
+/* ==================================================
+   6. STATUS BADGES
+================================================== */
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.status-approved {
+  background: #DCFCE7;
+  color: #15803D;
+  border-color: #86EFAC;
+}
+
+.status-rejected {
+  background: #FEE2E2;
+  color: #B91C1C;
+  border-color: #FCA5A5;
+}
+
+.status-pending {
+  background: #FEF3C7;
+  color: #B45309;
+  border-color: #FCD34D;
+}
+
+.status-default {
+  background: #E5E7EB;
+  color: #374151;
+  border-color: #D1D5DB;
+}
+
+.status-renew {
+  background: #fff3e4;
+  color: #b45309;
+}
+
+
+/* ==================================================
+   7. ACTION BUTTONS
+================================================== */
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 90px;
+  min-height: 40px;
+  padding: 0 18px;
+  color: #ffffff;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.16);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+/* UPDATE */
+.update-btn {
+  background: #16a34a;
+  border-color: #16a34a;
+}
+
+.update-btn:hover:not(:disabled) {
+  background: #15803d;
+  border-color: #15803d;
+  transform: translateY(-1px);
+}
+
+/* RENEW */
+.renew-btn {
+  background: #2196f3;
+  border-color: #2196f3;
+}
+
+.renew-btn:hover:not(:disabled) {
+  background: #1976d2;
+  border-color: #1976d2;
+  transform: translateY(-1px);
+}
+
+.action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.action-btn:focus-visible {
+  outline: 2px solid #5b4fe0;
+  outline-offset: 2px;
+}
+
+
+/* ==================================================
+   8. FORM SECTIONS
+================================================== */
+
+.form-section {
+  min-width: 0;
+  margin-bottom: 20px;
+  padding: var(--section-pad);
+  background: #ffffff;
+  border: 1px solid #e4eaf2;
+  border-radius: 10px;
+}
+
+.form-section:last-child {
+  margin-bottom: 0;
+}
+
+.form-section h3 {
+  margin: 0 0 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e8edf4;
+  color: #183153;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+
+/* ==================================================
+   9. FORM GRID
+   Desktop 4 col -> laptop 3 -> tablet 2 -> mobile 1
+================================================== */
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 18px;
+  row-gap: 20px;
+  align-items: start;
+  min-width: 0;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.field.full {
+  grid-column: 1 / -1;
+}
+
+
+/* ==================================================
+   10. FIELD LABELS
+================================================== */
+
+.label-text {
+  display: block;
+  min-width: 0;
+  color: #34445c;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+
+/* ==================================================
+   11. READONLY BOX
+================================================== */
+
+.readonly-box {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  min-height: 43px;
+  padding: 10px 12px;
+  background: #f1f3f6;
+  color: #6b7789;
+  border: 1px solid #dfe5ee;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.6;
+  cursor: not-allowed;
+  user-select: text;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+
+/* ==================================================
+   12. FILE BOX
+================================================== */
+
+.file-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 6px 6px 6px 12px;
+  background: #f1f3f6;
+  border: 1px solid #dfe5ee;
+  border-radius: 8px;
+}
+
+.file-box .clip {
+  flex-shrink: 0;
+  color: #6b7789;
+}
+
+.file-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #6b7789;
+  font-size: 13px;
+}
+
+.file-view {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 8px 10px;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.file-view:hover {
+  text-decoration: underline;
+}
+
+.file-view:focus-visible {
+  outline: 2px solid #5b4fe0;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+
+/* ==================================================
+   13. PREVIEW WINDOW
+================================================== */
+
+.preview-window {
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  width: min(560px, calc(100vw - 16px));
+  max-width: calc(100vw - 16px);
+  max-height: calc(100vh - 16px);
+  max-height: calc(100dvh - 16px);
+  background: #eef0fb;
+  border: 1px solid #c7cdf5;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+}
+
+
+/* ==================================================
+   14. PREVIEW HEADER
+================================================== */
+
+.preview-header {
+  display: flex;
+  align-items: center;
+  flex: none;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px 16px;
+  background: #c7d0f8;
+  user-select: none;
+}
+
+.preview-grip {
+  display: grid;
+  grid-template-columns: repeat(2, 5px);
+  gap: 3px;
+  flex-shrink: 0;
+  padding: 8px;
+  margin: -8px;
+  cursor: grab;
+  touch-action: none;
+}
+
+.preview-grip:active {
+  cursor: grabbing;
+}
+
+.preview-grip i {
+  width: 5px;
+  height: 5px;
+  background: #7a82b8;
+  border-radius: 50%;
+}
+
+.preview-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #2b3170;
+  font-weight: 600;
+}
+
+
+/* ==================================================
+   15. PREVIEW CLOSE BUTTON
+================================================== */
+
+.preview-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: #e53935;
+  color: #ffffff;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.preview-close:hover {
+  background: #c62828;
+}
+
+.preview-close:active {
+  background: #b71c1c;
+}
+
+.preview-close:focus-visible {
+  outline: 2px solid #b71c1c;
+  outline-offset: 2px;
+}
+
+
+/* ==================================================
+   16. PREVIEW BODY
+================================================== */
+
+.preview-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  width: 100%;
+  height: min(420px, 55vh);
+  height: min(420px, 55dvh);
+  min-height: 0;
+  background: #f4f5fc;
+  overflow: hidden;
+}
+
+.preview-body img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.preview-body iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.preview-msg {
+  margin: 0;
+  padding: 16px;
+  color: #66758c;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.preview-msg.error {
+  color: #b42318;
+}
+
+
+/* ==================================================
+   17. LARGE DESKTOP / TV (1600px+)
+================================================== */
+
+@media (min-width: 1600px) {
+
+  .preview-window {
+    width: min(640px, 92vw);
+  }
+
+  .preview-body {
+    height: min(480px, 55vh);
+    height: min(480px, 55dvh);
+  }
+
+}
+
+
+/* ==================================================
+   18. LAPTOP (max 1200px) -> 3 columns
+================================================== */
+
+@media (max-width: 1200px) {
+
+  .form-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+}
+
+
+/* ==================================================
+   19. TABLET (max 900px) -> 2 columns
+================================================== */
+
+@media (max-width: 900px) {
+
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 14px;
+    row-gap: 18px;
+  }
+
+}
+
+
+/* ==================================================
+   20. MOBILE (max 600px) -> 1 column
+================================================== */
+
+@media (max-width: 600px) {
+
+  .vendor-card {
+    border-radius: 10px;
+    margin-bottom: 16px;
+  }
+
+  /* Title upar, buttons neeche full width */
+  .card-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    flex: 0 0 auto;
+    gap: 8px;
+  }
+
+  .card-head > .action-btn,
+  .card-head > * > .action-btn {
+    width: 100%;
+  }
+
+  .form-section {
+    margin-bottom: 16px;
+    border-radius: 8px;
+  }
+
+  .form-section h3 {
+    margin-bottom: 16px;
+    font-size: 15px;
+  }
+
+  .form-grid {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 16px;
+  }
+
+  .field.full {
+    grid-column: auto;
+  }
+
+  .label-text {
+    font-size: 12.5px;
+  }
+
+  .readonly-box {
+    min-height: 42px;
+    font-size: 14px;
+  }
+
+  .file-box {
+    min-height: 44px;
+  }
+
+  .preview-window {
+    width: calc(100vw - 16px);
+    max-width: calc(100vw - 16px);
+    border-radius: 14px;
+  }
+
+  .preview-header {
+    gap: 10px;
+    padding: 10px 12px;
+  }
+
+  .preview-body {
+    height: min(340px, 55vh);
+    height: min(340px, 55dvh);
+  }
+
+}
+
+
+/* ==================================================
+   21. SMALL MOBILE (max 380px)
+================================================== */
+
+@media (max-width: 380px) {
+
+  .form-section {
+    padding: 12px 10px;
+  }
+
+  .form-section h3 {
+    font-size: 14px;
+  }
+
+  .file-box {
+    gap: 6px;
+    padding-left: 8px;
+  }
+
+  .file-name,
+  .file-view {
+    font-size: 12px;
+  }
+
+  .preview-title {
+    font-size: 13px;
+  }
+
+  .preview-close {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+}
+
+
+/* ==================================================
+   22. TOUCH DEVICES
+================================================== */
+
+@media (hover: none) and (pointer: coarse) {
+
+  .action-btn {
+    min-height: 44px;
+  }
+
+  .action-btn:hover:not(:disabled) {
+    transform: none;
+  }
+
+  .file-view {
+    padding: 12px 10px;
+  }
+
+  .preview-grip {
+    padding: 14px;
+    margin: -14px;
+  }
+
+  .preview-close {
+    width: 44px;
+    height: 44px;
+  }
+
+}
+
+
+/* ==================================================
+   23. SHORT SCREENS / LANDSCAPE PHONES
+================================================== */
+
+@media (max-height: 480px) {
+
+  .preview-window {
+    max-height: calc(100vh - 12px);
+    max-height: calc(100dvh - 12px);
+  }
+
+  .preview-body {
+    height: 45vh;
+    height: 45dvh;
+  }
+
+}
+
+
+/* ==================================================
+   24. PRINT
+================================================== */
+
+@media print {
+
+  .vendor-card {
+    box-shadow: none;
+    break-inside: avoid;
+  }
+
+  .action-btn,
+  .preview-window {
+    display: none !important;
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+}
+
+
+/* ==================================================
+   25. ACCESSIBILITY
+================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+
+}

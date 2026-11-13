@@ -1,0 +1,106 @@
+<div class="shell" [class.collapsed]="collapsed()" [class.open]="mobileOpen()">
+
+  <!-- Mobile backdrop -->
+  <div class="backdrop" (click)="closeSidebar()"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+
+    <div class="brand">
+      <img src="/favicon.png" alt="Zydus Hospitals" class="brand-logo" />
+
+      <div>
+        <strong>Vendor Management</strong>
+        <small>Purchaser Portal</small>
+      </div>
+    </div>
+
+    <nav>
+      @for (item of menu; track item.key) {
+      <a class="nav-item" [class.active]="view() === item.key" href="#"
+        (click)="$event.preventDefault(); setView(item.key)">
+        <span class="material-symbols-rounded">
+          {{ item.icon }}
+        </span>
+
+        <span class="grow">{{ item.label }}</span>
+      </a>
+      }
+    </nav>
+
+    <!-- Sidebar bottom -->
+    <div class="promo">
+      <span class="material-symbols-rounded">handshake</span>
+
+      <strong>
+        Trusted Vendors<br />
+        Better Business
+      </strong>
+    </div>
+
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Header -->
+    <header class="topbar">
+
+      <button class="icon-btn" aria-label="Toggle menu" [attr.aria-expanded]="mobileOpen()" (click)="toggleSidebar()">
+        <span class="material-symbols-rounded">menu</span>
+      </button>
+
+      <div class="top-actions">
+
+
+
+        <!-- User menu -->
+        <div class="user-menu">
+
+          <button class="user" aria-haspopup="menu" [attr.aria-expanded]="menuOpen()" (click)="toggleMenu($event)">
+
+            <span class="avatar">
+              {{ user().initials || '–' }}
+            </span>
+
+            <div class="user-text">
+              <strong>{{ user().name }}</strong>
+              <small>{{ user().role }}</small>
+            </div>
+
+            <span class="material-symbols-rounded chev" [class.up]="menuOpen()">
+              expand_more
+            </span>
+
+          </button>
+
+          @if (menuOpen()) {
+          <div class="dropdown" role="menu">
+
+            <button class="dropdown-item" role="menuitem" (click)="logout()">
+              <span class="material-symbols-rounded">
+                logout
+              </span>
+
+              Logout
+            </button>
+
+          </div>
+          }
+
+        </div>
+
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="content">
+
+      <!-- Default page: Vendors -->
+      <app-vendors />
+
+    </div>
+
+  </main>
+
+</div>

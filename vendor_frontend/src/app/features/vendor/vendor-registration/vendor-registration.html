@@ -1,0 +1,1617 @@
+<div class="page">
+  <main class="form-container">
+
+    <!-- FORM HEADER -->
+    <div class="form-heading">
+      <div class="heading-row">
+
+        <div class="heading-content">
+          <h2>
+            {{ isRenew ? 'Vendor Renewal Form'
+            : isUpdate ? 'Vendor Update Form' :
+            'Vendor Registration Form' }}
+          </h2>
+
+          <p>
+            Fields marked with
+            <span class="required">*</span>
+            are mandatory.
+          </p>
+        </div>
+
+        <a *ngIf="!isRenew && !isUpdate" class="login-link" routerLink="/login">
+          Already registered? Login
+        </a>
+
+        <a *ngIf="isRenew || isUpdate" class="login-link back-link" routerLink="/vendor-portal/vendor-list">
+          Back
+        </a>
+
+      </div>
+
+      <div class="progress-container">
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="formProgress">
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- MAIN FORM -->
+    <form #vendorForm="ngForm" (ngSubmit)="submitForm(vendorForm)" (input)="clearServerError($event)"
+      (click)="closeDropdownsOnOutsideClick($event)" novalidate>
+
+
+      <!-- REUSABLE FILE BOX -->
+      <ng-template #fileBox let-field="field" let-input="input" let-invalid="invalid">
+
+        <div class="file-box" [class.invalid-field]="invalid">
+
+          <button type="button" class="file-btn" (click)="openPicker(input)">
+            Choose File
+          </button>
+
+          <span class="file-name" [class.has-file]="files[field] || existingFiles[field]"
+            (mouseenter)="showHover(field, $event)" (mousemove)="moveHover($event)" (mouseleave)="hideHover()">
+
+            {{ displayName(field) }}
+
+          </span>
+
+          <a *ngIf="existingFiles[field] || files[field]" class="file-view" role="button" tabindex="0"
+            (click)="openPreview(field)" (keydown.enter)="openPreview(field)" (mouseenter)="showHover(field, $event)"
+            (mousemove)="moveHover($event)" (mouseleave)="hideHover()">
+
+            View
+
+          </a>
+
+        </div>
+      </ng-template>
+
+
+      <!-- REUSABLE MASTER DROPDOWN
+           CATEGORY (category_id) + PREFERRED LOCATION (zydus_master_id)
+
+           CHANGED:
+           - new "label" input
+           - wrapper .master-wrap
+           - floating label (admin only)
+           - "Select {{ label }}" row (admin only) -->
+      <ng-template #masterSelect let-key="key" let-model="model" let-label="label" let-placeholder="placeholder"
+        let-errorText="errorText">
+
+        <!-- Selected Master ID -->
+        <input type="hidden" [name]="model" [(ngModel)]="vendor[model]" #ctrl="ngModel" required>
+
+        <div class="master-wrap" [class.admin-select]="isAdmin">
+
+          <!-- Floating label on the border (admin only) -->
+          <span class="float-label" *ngIf="isAdmin">
+            {{ label }}<span class="required"> *</span>
+          </span>
+
+          <details #dd class="custom-dropdown" (toggle)="dd.open ? openMaster(key) : ctrl.control.markAsTouched()"
+            [class.invalid-field]="ctrl.invalid && (ctrl.touched || vendorForm.submitted)">
+
+            <!-- Dropdown Header -->
+            <summary class="dropdown-trigger">
+              <span [class.placeholder]="!getMasterName(key, vendor[model])">
+                {{ getMasterName(key, vendor[model]) || placeholder }}
+              </span>
+
+              <span class="dropdown-arrow"></span>
+            </summary>
+
+
+            <!-- Dropdown Options -->
+            <div class="dropdown-menu">
+
+              <!-- ADMIN ONLY OPTIONS -->
+              <ng-container *ngIf="isAdmin">
+
+                <!-- Search -->
+                <input type="text" class="dropdown-search" placeholder="Type to search..." autocomplete="off"
+                  [name]="key + '_search'" [ngModelOptions]="{ standalone: true }"
+                  [(ngModel)]="getMasterState(key).search" (keydown.enter)="$event.preventDefault()">
+
+                <!-- Create / Update / Delete -> sirf Category ke liye -->
+                <button type="button" class="dropdown-option create-new" *ngIf="key === 'category'"
+                  (click)="openManageDialog(key, label, dd)">
+                  Create / Manage {{ label }}
+                </button>
+
+                <!-- Select Empty (clears the selection) -->
+                <button type="button" class="dropdown-option placeholder-option"
+                  (click)="selectMaster(key, '', ctrl, dd)">
+                  Select {{ label }}
+                </button>
+
+              </ng-container>
+
+
+              <!-- API ERROR -->
+              <p class="create-error" *ngIf="getMasterState(key).error">
+                {{ getMasterState(key).error }}
+              </p>
+
+
+              <!-- LOADING -->
+              <p class="dropdown-empty" *ngIf="getMasterState(key).loading">
+                Loading...
+              </p>
+
+
+              <!-- MASTER OPTIONS -->
+              <button type="button" class="dropdown-option" *ngFor="let option of filteredMaster(key)"
+                [class.selected]="vendor[model] == option.id" [class.yellow]="!isRenew && vendor[model] == option.id"
+                (click)="selectMaster(key, option.id, ctrl, dd)">
+
+                {{ option.name }}
+
+              </button>
+
+
+              <!-- NO DATA -->
+              <p class="dropdown-empty" *ngIf="!getMasterState(key).loading && !filteredMaster(key).length">
+                No results found
+              </p>
+
+            </div>
+          </details>
+
+        </div>
+
+
+        <!-- VALIDATION -->
+        <small class="validation-error" *ngIf="ctrl.invalid && (ctrl.touched || vendorForm.submitted)">
+          {{ errorText }}
+        </small>
+
+      </ng-template>
+
+
+
+      <!-- 1. VENDOR DETAILS -->
+      <section class="form-section">
+
+        <h3>Vendor Details</h3>
+
+        <div class="form-grid">
+
+          <!-- VENDOR NAME -->
+          <label>
+            <span class="label-text">
+              Vendor Name <span class="required">*</span>
+            </span>
+
+            <input name="name" [(ngModel)]="vendor.name" #nameCtrl="ngModel" required maxlength="100"
+              placeholder="Enter vendor name"
+              [class.invalid-field]="(nameCtrl.invalid && (nameCtrl.touched || vendorForm.submitted)) || !!serverErrors['name']">
+
+            <small class="validation-error" *ngIf="nameCtrl.invalid && (nameCtrl.touched || vendorForm.submitted)">
+              Vendor Name is required!
+            </small>
+
+            <small class="validation-error" *ngIf="serverErrors['name']">
+              {{ serverErrors['name'] }}
+            </small>
+          </label>
+
+
+          <!-- CATEGORY
+               CHANGED: normal label hidden for admin (admin gets a floating label) -->
+          <div class="field">
+
+            <span class="label-text" *ngIf="!isAdmin">
+              Category <span class="required">*</span>
+            </span>
+
+            <ng-container *ngTemplateOutlet="masterSelect; context: {
+                key: 'category',
+                model: 'category_id',
+                label: 'Category',
+                placeholder: 'Select Category',
+                errorText: 'Please select Category!'
+              }">
+            </ng-container>
+
+          </div>
+
+
+          <!-- ADDRESS -->
+          <label class="full">
+
+            <span class="label-text">
+              Address <span class="required">*</span>
+            </span>
+
+            <textarea name="address" [(ngModel)]="vendor.address" #addressCtrl="ngModel" required rows="2"
+              placeholder="Enter Address"
+              [class.invalid-field]="(addressCtrl.invalid && (addressCtrl.touched || vendorForm.submitted)) || !!serverErrors['address']">
+            </textarea>
+
+            <small class="validation-error"
+              *ngIf="addressCtrl.invalid && (addressCtrl.touched || vendorForm.submitted)">
+              Address is required!
+            </small>
+
+            <small class="validation-error" *ngIf="serverErrors['address']">
+              {{ serverErrors['address'] }}
+            </small>
+
+          </label>
+
+
+          <!-- CITY -->
+          <label>
+
+            <span class="label-text">
+              City <span class="required">*</span>
+            </span>
+
+            <input name="city" [(ngModel)]="vendor.city" #cityCtrl="ngModel" required maxlength="50"
+              placeholder="Enter City Name"
+              [class.invalid-field]="(cityCtrl.invalid && (cityCtrl.touched || vendorForm.submitted)) || !!serverErrors['city']">
+
+            <small class="validation-error"
+              *ngIf="cityCtrl.hasError('required') && (cityCtrl.touched || vendorForm.submitted)">
+              City is required!
+            </small>
+
+            <small class="validation-error" *ngIf="serverErrors['city']">
+              {{ serverErrors['city'] }}
+            </small>
+
+          </label>
+
+
+          <!-- PIN CODE -->
+          <label>
+
+            <span class="label-text">
+              PIN Code <span class="required">*</span>
+            </span>
+
+            <input data-field="pincode" name="pincode" [(ngModel)]="vendor.pincode" #pincodeCtrl="ngModel" required
+              appNumbersOnly maxlength="6" inputmode="numeric" placeholder="Enter 6 digit Pincode"
+              [class.invalid-field]="(pincodeCtrl.invalid && (pincodeCtrl.touched || vendorForm.submitted)) || !!serverErrors['pincode']">
+
+            <small class="validation-error"
+              *ngIf="pincodeCtrl.hasError('required') && (pincodeCtrl.touched || vendorForm.submitted)">
+              PIN Code is required!
+            </small>
+
+            <small class="validation-error" *ngIf="serverErrors['pincode']">
+              {{ serverErrors['pincode'] }}
+            </small>
+
+          </label>
+
+
+          <!-- STATE -->
+          <label>
+
+            <span class="label-text">
+              State <span class="required">*</span>
+            </span>
+
+            <input name="state" [(ngModel)]="vendor.state" #stateCtrl="ngModel" required maxlength="50"
+              placeholder="Enter State Name"
+              [class.invalid-field]="(stateCtrl.invalid && (stateCtrl.touched || vendorForm.submitted)) || !!serverErrors['state']">
+
+            <small class="validation-error" *ngIf="stateCtrl.invalid && (stateCtrl.touched || vendorForm.submitted)">
+              State is required!
+            </small>
+
+            <small class="validation-error" *ngIf="serverErrors['state']">
+              {{ serverErrors['state'] }}
+            </small>
+
+          </label>
+
+
+          <!-- COUNTRY -->
+          <label>
+
+            <span class="label-text">
+              Country <span class="required">*</span>
+            </span>
+
+            <input name="country" [(ngModel)]="vendor.country" #countryCtrl="ngModel" required maxlength="50"
+              placeholder="Enter Country Name"
+              [class.invalid-field]="(countryCtrl.invalid && (countryCtrl.touched || vendorForm.submitted)) || !!serverErrors['country']">
+
+            <small class="validation-error"
+              *ngIf="countryCtrl.invalid && (countryCtrl.touched || vendorForm.submitted)">
+              Country is required!
+            </small>
+
+            <small class="validation-error" *ngIf="serverErrors['country']">
+              {{ serverErrors['country'] }}
+            </small>
+
+          </label>
+
+        </div>
+      </section>
+
+
+
+      <!-- 2. VENDOR CONTACT DETAILS -->
+      <section class="form-section">
+
+        <h3>Vendor Contact Details</h3>
+
+        <div class="form-grid">
+
+          <!-- TELEPHONE -->
+          <label>
+
+            Telephone Number
+
+            <input name="telephone_no" [(ngModel)]="vendor.telephone_no" #telCtrl="ngModel" type="tel" appNumbersOnly
+              maxlength="15" inputmode="numeric" placeholder="Enter Telephone Number"
+              [class.invalid-field]="!!serverErrors['telephone_no']">
+
+            <small class="validation-error" *ngIf="serverErrors['telephone_no']">
+              {{ serverErrors['telephone_no'] }}
+            </small>
+
+          </label>
+
+
+          <!-- MOBILE NUMBER -->
+          <label>
+
+            <span class="label-text">
+              Mobile Number <span class="required">*</span>
+            </span>
+
+            <input data-field="mobile_no" name="mobile_no" [(ngModel)]="vendor.mobile_no" #mobileCtrl="ngModel"
+              [disabled]="isRenew" type="tel" required appNumbersOnly maxlength="10" inputmode="numeric"
+              placeholder="Enter 10 digit Mobile Number"
+              [class.invalid-field]="(mobileCtrl.invalid && (mobileCtrl.touched || vendorForm.submitted)) || !!serverErrors['mobile_no']">
+
+            <small class="validation-error"
+              *ngIf="mobileCtrl.hasError('required') && (mobileCtrl.touched || vendorForm.submitted)">
+              Mobile Number is required!
+            </small>
+
+            <small class="validation-error" *ngIf="serverErrors['mobile_no']">
+              {{ serverErrors['mobile_no'] }}
+            </small>
+
+          </label>
+
+
+          <!-- EMAIL -->
+          <label>
+
+            <span class="label-text">
+              Email Address <span class="required">*</span>
+            </span>
+
+            <input data-field="email" name="email" [(ngModel)]="vendor.email" #emailCtrl="ngModel" type="email" required
+              maxlength="100" placeholder="Enter Email Address"
+              [class.invalid-field]="(emailCtrl.invalid && (emailCtrl.touched || vendorForm.submitted)) || !!serverErrors['email']">
+
+            <small class="validation-error"
+              *ngIf="emailCtrl.hasError('required') && (emailCtrl.touched || vendorForm.submitted)">
+              Email Address is required!
+            </small>
+
+            <small class="validation-error" *ngIf="serverErrors['email']">
+              {{ serverErrors['email'] }}
+            </small>
+
+          </label>
+
+
+          <!-- CONTACT PERSON -->
+          <label>
+
+            <span class="label-text">
+              Contact Person Name <span class="required">*</span>
+            </span>
+
+            <input name="contact_person_name" [(ngModel)]="vendor.contact_person_name" #contactCtrl="ngModel" required
+              maxlength="100" placeholder="Enter Contact Person Name"
+              [class.invalid-field]="(contactCtrl.invalid && (contactCtrl.touched || vendorForm.submitted)) || !!serverErrors['contact_person_name']">
+
+            <small class="validation-error"
+              *ngIf="contactCtrl.invalid && (contactCtrl.touched || vendorForm.submitted)">
+              Contact Person Name is required!
+            </small>
+
+            <small class="validation-error" *ngIf="serverErrors['contact_person_name']">
+              {{ serverErrors['contact_person_name'] }}
+            </small>
+
+          </label>
+
+        </div>
+      </section>
+
+
+
+      <!-- 3. BUSINESS DETAILS -->
+      <section class="form-section">
+
+        <h3>Business Details</h3>
+
+        <div class="form-grid">
+
+          <!-- GST NUMBER -->
+          <label>
+
+            <span class="label-text">
+              GST Number
+            </span>
+
+            <input data-field="gst_number" name="gst_number" [(ngModel)]="vendor.gst_number" #gstCtrl="ngModel"
+              maxlength="15" placeholder="Enter GST Number" [class.invalid-field]="!!serverErrors['gst_number']">
+
+            <small class="validation-error" *ngIf="serverErrors['gst_number']">
+              {{ serverErrors['gst_number'] }}
+            </small>
+
+          </label>
+
+
+          <!-- GST BUSINESS PLACE -->
+          <label>
+
+            <span class="label-text">
+              GST No. Primary Business Place / Manufacturing Location
+              <span class="required">*</span>
+            </span>
+
+            <input type="hidden" name="gst_business_place" [(ngModel)]="vendor.gst_business_place"
+              #gstPlaceCtrl="ngModel" required>
+
+            <details #gstDropdown class="custom-dropdown"
+              (toggle)="!gstDropdown.open && gstPlaceCtrl.control.markAsTouched()"
+              [class.invalid-field]="gstPlaceCtrl.invalid && (gstPlaceCtrl.touched || vendorForm.submitted)">
+
+              <summary class="dropdown-trigger">
+
+                <span>
+                  {{ vendor.gst_business_place || 'Select option' }}
+                </span>
+
+                <span class="dropdown-arrow"></span>
+
+              </summary>
+
+              <div class="dropdown-menu">
+
+                <button type="button" class="dropdown-option" *ngFor="let option of ['Yes', 'No']"
+                  [class.selected]="vendor.gst_business_place === option" (click)="
+                    gstPlaceCtrl.control.setValue(option);
+                    gstPlaceCtrl.control.markAsTouched();
+                    gstDropdown.open = false;
+                  ">
+
+                  {{ option }}
+
+                </button>
+
+              </div>
+            </details>
+
+            <small class="validation-error"
+              *ngIf="gstPlaceCtrl.invalid && (gstPlaceCtrl.touched || vendorForm.submitted)">
+              Please select GST Business Place!
+            </small>
+
+          </label>
+
+
+          <!-- GST CERTIFICATE -->
+          <label *ngIf="vendor.gst_business_place === 'Yes'">
+
+            <span class="label-text">
+              GST Certificate <span class="required">*</span>
+            </span>
+
+            <input #gstFile class="native-file" type="file" name="gst_certificate_attachment"
+              accept=".pdf,.jpg,.jpeg,.png"
+              (change)="onFileSelected($event, 'gst_certificate_attachment'); gstFile.dataset['touched'] = 'true'"
+              (cancel)="gstFile.dataset['touched'] = 'true'">
+
+            <ng-container *ngTemplateOutlet="fileBox; context: {
+                field: 'gst_certificate_attachment',
+                input: gstFile,
+                invalid: fileInvalid('gst_certificate_attachment', gstFile) && (gstFile.dataset['touched'] === 'true' || vendorForm.submitted)
+              }">
+            </ng-container>
+
+            <small class="validation-error"
+              *ngIf="fileInvalid('gst_certificate_attachment', gstFile) && (gstFile.dataset['touched'] === 'true' || vendorForm.submitted)">
+              {{ fileErrors['gst_certificate_attachment'] || 'GST Certificate is required!' }}
+            </small>
+
+          </label>
+
+
+          <!-- PANCARD -->
+          <label>
+
+            <span class="label-text">
+              Pancard <span class="required">*</span>
+            </span>
+
+            <input type="hidden" name="pancard" [(ngModel)]="vendor.pancard" #panCtrl="ngModel" [disabled]="isRenew"
+              required>
+
+            <details #panDropdown class="custom-dropdown" [class.locked]="isRenew"
+              (toggle)="!panDropdown.open && panCtrl.control.markAsTouched()"
+              [class.invalid-field]="panCtrl.invalid && (panCtrl.touched || vendorForm.submitted)">
+
+              <summary class="dropdown-trigger" (click)="isRenew ? $event.preventDefault() : null">
+
+                <span>
+                  {{ vendor.pancard || 'Select option' }}
+                </span>
+
+                <span class="dropdown-arrow"></span>
+
+              </summary>
+
+              <div class="dropdown-menu">
+
+                <button type="button" class="dropdown-option" *ngFor="let option of ['Yes', 'No']"
+                  [class.selected]="vendor.pancard === option" (click)="
+                    panCtrl.control.setValue(option);
+                    panCtrl.control.markAsTouched();
+                    panDropdown.open = false;
+                  ">
+
+                  {{ option }}
+
+                </button>
+
+              </div>
+            </details>
+
+            <small class="validation-error" *ngIf="panCtrl.invalid && (panCtrl.touched || vendorForm.submitted)">
+              Please select Pancard!
+            </small>
+
+          </label>
+
+
+          <!-- PAN CERTIFICATE -->
+          <label *ngIf="vendor.pancard === 'Yes'">
+
+            <span class="label-text">
+              Pancard Certificate <span class="required">*</span>
+            </span>
+
+            <input #panFile class="native-file" type="file" name="pan_card_attachment" accept=".pdf,.jpg,.jpeg,.png"
+              (change)="onFileSelected($event, 'pan_card_attachment'); panFile.dataset['touched'] = 'true'"
+              (cancel)="panFile.dataset['touched'] = 'true'">
+
+            <ng-container *ngTemplateOutlet="fileBox; context: {
+                field: 'pan_card_attachment',
+                input: panFile,
+                invalid: fileInvalid('pan_card_attachment', panFile) && (panFile.dataset['touched'] === 'true' || vendorForm.submitted)
+              }">
+            </ng-container>
+
+            <small class="validation-error"
+              *ngIf="fileInvalid('pan_card_attachment', panFile) && (panFile.dataset['touched'] === 'true' || vendorForm.submitted)">
+              {{ fileErrors['pan_card_attachment'] || 'Pancard Certificate is required!' }}
+            </small>
+
+          </label>
+
+
+          <!-- PERMANENT ACCOUNT NUMBER -->
+          <label>
+
+            <span class="label-text">
+              Permanent Account No. <span class="required">*</span>
+            </span>
+
+            <input data-field="permanent_account_no" name="permanent_account_no"
+              [(ngModel)]="vendor.permanent_account_no" #permanentCtrl="ngModel" [disabled]="isRenew" required
+              maxlength="10" minlength="10" placeholder="Enter PAN (e.g. ABCDE1234F)" autocomplete="off"
+              [class.invalid-field]="(permanentCtrl.invalid && (permanentCtrl.touched || vendorForm.submitted)) || !!serverErrors['permanent_account_no']">
+
+            <small class="validation-error"
+              *ngIf="permanentCtrl.hasError('required') && (permanentCtrl.touched || vendorForm.submitted)">
+              Permanent Account No. is required!
+            </small>
+
+            <small class="validation-error"
+              *ngIf="permanentCtrl.hasError('minlength') && (permanentCtrl.touched || vendorForm.submitted)">
+              PAN Number must be ABCDE1234F!
+            </small>
+
+            <small class="validation-error" *ngIf="serverErrors['permanent_account_no']">
+              {{ serverErrors['permanent_account_no'] }}
+            </small>
+
+          </label>
+
+
+          <!-- DRUG LICENCE -->
+          <label>
+
+            <span class="label-text">
+              Drug Licence if applicable must mentioned
+              <span class="required">*</span>
+            </span>
+
+            <input type="hidden" name="drug_licence" [(ngModel)]="vendor.drug_licence" #drugCtrl="ngModel" required>
+
+            <details #drugDropdown class="custom-dropdown"
+              (toggle)="!drugDropdown.open && drugCtrl.control.markAsTouched()"
+              [class.invalid-field]="drugCtrl.invalid && (drugCtrl.touched || vendorForm.submitted)">
+
+              <summary class="dropdown-trigger">
+
+                <span>
+                  {{ vendor.drug_licence || 'Select option' }}
+                </span>
+
+                <span class="dropdown-arrow"></span>
+
+              </summary>
+
+              <div class="dropdown-menu">
+
+                <button type="button" class="dropdown-option" *ngFor="let option of ['Yes', 'No']"
+                  [class.selected]="vendor.drug_licence === option" (click)="
+                    drugCtrl.control.setValue(option);
+                    drugCtrl.control.markAsTouched();
+                    drugDropdown.open = false;
+                  ">
+
+                  {{ option }}
+
+                </button>
+
+              </div>
+            </details>
+
+            <small class="validation-error" *ngIf="drugCtrl.invalid && (drugCtrl.touched || vendorForm.submitted)">
+              Please select Drug Licence!
+            </small>
+
+          </label>
+
+
+          <!-- DRUG LICENCE FILE -->
+          <label *ngIf="vendor.drug_licence === 'Yes'">
+
+            <span class="label-text">
+              Drug Licence <span class="required">*</span>
+            </span>
+
+            <input #drugFile class="native-file" type="file" name="drug_licence_attachment"
+              accept=".pdf,.jpg,.jpeg,.png"
+              (change)="onFileSelected($event, 'drug_licence_attachment'); drugFile.dataset['touched'] = 'true'"
+              (cancel)="drugFile.dataset['touched'] = 'true'">
+
+            <ng-container *ngTemplateOutlet="fileBox; context: {
+                field: 'drug_licence_attachment',
+                input: drugFile,
+                invalid: fileInvalid('drug_licence_attachment', drugFile) && (drugFile.dataset['touched'] === 'true' || vendorForm.submitted)
+              }">
+            </ng-container>
+
+            <small class="validation-error"
+              *ngIf="fileInvalid('drug_licence_attachment', drugFile) && (drugFile.dataset['touched'] === 'true' || vendorForm.submitted)">
+              {{ fileErrors['drug_licence_attachment'] || 'Drug Licence file is required!' }}
+            </small>
+
+          </label>
+
+
+          <!-- STATUS OF VENDOR -->
+          <label>
+
+            <span class="label-text">
+              Status of Vendor [for Income Tax Purpose]
+              <span class="required">*</span>
+            </span>
+
+            <input type="hidden" name="status_of_vendor" [(ngModel)]="vendor.status_of_vendor" #statusCtrl="ngModel"
+              required>
+
+            <details #statusDropdown class="custom-dropdown"
+              (toggle)="!statusDropdown.open && statusCtrl.control.markAsTouched()"
+              [class.invalid-field]="statusCtrl.invalid && (statusCtrl.touched || vendorForm.submitted)">
+
+              <summary class="dropdown-trigger">
+
+                <span>
+                  {{ vendor.status_of_vendor || 'Select option' }}
+                </span>
+
+                <span class="dropdown-arrow"></span>
+
+              </summary>
+
+              <div class="dropdown-menu">
+
+                <button type="button" class="dropdown-option" *ngFor="let option of [
+                    'Whether Partnership',
+                    'Private',
+                    'Public Ltd Co',
+                    'Sole Propritor'
+                  ]" [class.selected]="vendor.status_of_vendor === option" (click)="
+                    statusCtrl.control.setValue(option);
+                    statusCtrl.control.markAsTouched();
+                    statusDropdown.open = false;
+                  ">
+
+                  {{ option }}
+
+                </button>
+
+              </div>
+            </details>
+
+            <small class="validation-error" *ngIf="statusCtrl.invalid && (statusCtrl.touched || vendorForm.submitted)">
+              Please select Status of Vendor!
+            </small>
+
+          </label>
+
+
+          <!-- NAME OF PARTNERS -->
+          <label>
+
+            <span class="label-text">
+              Name of Partners / Directors / Proprietor
+              <span class="required">*</span>
+            </span>
+
+            <input name="name_of_partners" [(ngModel)]="vendor.name_of_partners" #partnersCtrl="ngModel" required
+              maxlength="100" placeholder="Enter Name of Partners / Directors / Propritor"
+              [class.invalid-field]="(partnersCtrl.invalid && (partnersCtrl.touched || vendorForm.submitted)) || !!serverErrors['name_of_partners']">
+
+            <small class="validation-error"
+              *ngIf="partnersCtrl.invalid && (partnersCtrl.touched || vendorForm.submitted)">
+              Name of Partners / Directors / Proprietor is required!
+            </small>
+
+            <small class="validation-error" *ngIf="serverErrors['name_of_partners']">
+              {{ serverErrors['name_of_partners'] }}
+            </small>
+
+          </label>
+
+
+          <!-- PERMANENT ESTABLISHMENT -->
+          <label>
+
+            <span class="label-text">
+              Permanent Establishment [PE] in India
+            </span>
+
+            <input name="permanent_establishment" [(ngModel)]="vendor.permanent_establishment" maxlength="100"
+              placeholder="Enter Permanent Establishment">
+
+          </label>
+
+
+          <!-- PAYMENT TERMS -->
+          <label>
+
+            <span class="label-text">
+              Payment Terms <span class="required">*</span>
+            </span>
+
+            <input type="hidden" name="payment_terms" [(ngModel)]="vendor.payment_terms" #paymentCtrl="ngModel"
+              required>
+
+            <details #paymentDropdown class="custom-dropdown"
+              (toggle)="!paymentDropdown.open && paymentCtrl.control.markAsTouched()"
+              [class.invalid-field]="paymentCtrl.invalid && (paymentCtrl.touched || vendorForm.submitted)">
+
+              <summary class="dropdown-trigger">
+
+                <span>
+                  {{ vendor.payment_terms || 'Select option' }}
+                </span>
+
+                <span class="dropdown-arrow"></span>
+
+              </summary>
+
+              <div class="dropdown-menu">
+
+                <button type="button" class="dropdown-option" *ngFor="let option of [
+                    '7 Days',
+                    '30 Days',
+                    '50% Advance',
+                    '100% Advance',
+                    'After Received The Material',
+                    'Other'
+                  ]" [class.selected]="vendor.payment_terms === option" (click)="
+                    paymentCtrl.control.setValue(option);
+                    paymentCtrl.control.markAsTouched();
+                    paymentDropdown.open = false;
+                  ">
+
+                  {{ option }}
+
+                </button>
+
+              </div>
+            </details>
+
+            <small class="validation-error"
+              *ngIf="paymentCtrl.invalid && (paymentCtrl.touched || vendorForm.submitted)">
+              Please select Payment Terms!
+            </small>
+
+          </label>
+
+
+          <!-- CIN NUMBER -->
+          <label>
+
+            <span class="label-text">
+              Corporate Identity Number (CIN)
+            </span>
+
+            <input name="cin_number" [(ngModel)]="vendor.cin_number" #cinCtrl="ngModel" maxlength="21"
+              placeholder="Enter CIN" [class.invalid-field]="!!serverErrors['cin_number']">
+
+            <small class="validation-error" *ngIf="serverErrors['cin_number']">
+              {{ serverErrors['cin_number'] }}
+            </small>
+
+          </label>
+
+
+          <!-- PREFERRED LOCATION
+               Shows site_name, stores zydus_master_id.
+               The list is fetched from the API when this dropdown is opened.
+               CHANGED: normal label hidden for admin (admin gets a floating label) -->
+          <div class="field">
+
+            <span class="label-text" *ngIf="!isAdmin">
+              Preferred Location <span class="required">*</span>
+            </span>
+
+            <ng-container *ngTemplateOutlet="masterSelect; context: {
+                key: 'site',
+                model: 'zydus_master_id',
+                label: 'Preferred Location',
+                placeholder: 'Select Preferred Location',
+                errorText: 'Please select Preferred Location!'
+              }">
+            </ng-container>
+
+          </div>
+
+        </div>
+      </section>
+
+
+
+      <!-- 4. STATUTORY INFORMATION -->
+      <section class="form-section">
+
+        <h3>
+          Statutory Information is required to determine whether
+          the party is liable for TDS or not
+        </h3>
+
+        <div class="form-grid">
+
+          <label>
+
+            <span class="label-text">TDS Flag</span>
+
+            <input name="tds_flag" [(ngModel)]="vendor.tds_flag" maxlength="50" placeholder="Enter TDS Flag">
+
+          </label>
+
+
+          <label>
+
+            <span class="label-text">TDS Rate</span>
+
+            <input name="tds_rate" [(ngModel)]="vendor.tds_rate" maxlength="20" placeholder="Enter TDS Rate">
+
+          </label>
+
+
+          <label class="full">
+
+            <span class="label-text">
+              Description / Classification of Taxable Service
+            </span>
+
+            <textarea name="classification_of_taxable_service" [(ngModel)]="vendor.classification_of_taxable_service"
+              rows="2" maxlength="191" placeholder="Enter Description / Classification of Taxable Service">
+            </textarea>
+
+          </label>
+
+        </div>
+      </section>
+
+
+
+      <!-- 5. ENTERPRISE DETAILS -->
+      <section class="form-section enterprise-section">
+
+        <h3>Enterprise Details</h3>
+
+        <div class="enterprise-content">
+
+          <!-- MSMED -->
+          <div class="enterprise-question">
+
+            <label class="label-text">
+              If, Manufacturer, whether in the small-scale sector?
+              Whether covered under Micro, Small and Medium Enterprise
+              Development Act, 2006. (MSMED)?
+            </label>
+
+            <label class="radio-option">
+              <input type="radio" name="msmed_small_scale" [(ngModel)]="vendor.msmed_small_scale" value="Yes">
+              <span>Yes</span>
+            </label>
+
+            <label class="radio-option">
+              <input type="radio" name="msmed_small_scale" [(ngModel)]="vendor.msmed_small_scale" value="No">
+              <span>No</span>
+            </label>
+
+
+            <!-- MSMED FILE -->
+            <label *ngIf="vendor.msmed_small_scale === 'Yes'">
+
+              <span class="label-text">
+                Please attach a valid proof
+                <span class="required">*</span>
+              </span>
+
+              <input #msmedFile class="native-file" type="file" name="msmed_attachment" accept=".pdf,.jpg,.jpeg,.png"
+                (change)="onFileSelected($event, 'msmed_attachment'); msmedFile.dataset['touched'] = 'true'"
+                (cancel)="msmedFile.dataset['touched'] = 'true'">
+
+              <ng-container *ngTemplateOutlet="fileBox; context: {
+                  field: 'msmed_attachment',
+                  input: msmedFile,
+                  invalid: fileInvalid('msmed_attachment', msmedFile) && (msmedFile.dataset['touched'] === 'true' || vendorForm.submitted)
+                }">
+              </ng-container>
+
+              <small class="validation-error"
+                *ngIf="fileInvalid('msmed_attachment', msmedFile) && (msmedFile.dataset['touched'] === 'true' || vendorForm.submitted)">
+                {{ fileErrors['msmed_attachment'] || 'MSMED Proof is required!' }}
+              </small>
+
+            </label>
+
+          </div>
+
+
+          <!-- EXPERIENCE FOR EACH PRODUCT -->
+          <div class="enterprise-field">
+
+            <label class="label-text">
+              Experience for Each Product. (Please attach separate list
+              for details along with manufacturing & technical detail / catalogue.)
+            </label>
+
+            <input #expProductFile class="native-file" type="file" name="experience_product_attachment"
+              accept=".pdf,.jpg,.jpeg,.png" (change)="onFileSelected($event, 'experience_product_attachment')">
+
+            <ng-container *ngTemplateOutlet="fileBox; context: {
+                field: 'experience_product_attachment',
+                input: expProductFile,
+                invalid: false
+              }">
+            </ng-container>
+
+            <small class="error">
+              {{ fileErrors['experience_product_attachment'] }}
+            </small>
+
+          </div>
+
+
+          <!-- DELIVERY THROUGH -->
+          <div class="enterprise-field">
+
+            <label class="label-text">
+              Delivery Through
+            </label>
+
+            <input type="text" name="delivery_through" [(ngModel)]="vendor.delivery_through" maxlength="100"
+              placeholder="Enter Delivery Through">
+
+          </div>
+
+
+          <!-- COA -->
+          <div class="enterprise-field">
+
+            <label class="label-text">
+              Certificate of Analysis (COA) if applicable
+            </label>
+
+            <input #coaFile class="native-file" type="file" name="coa_attachment" accept=".pdf,.jpg,.jpeg,.png"
+              (change)="onFileSelected($event, 'coa_attachment')">
+
+            <ng-container *ngTemplateOutlet="fileBox; context: {
+                field: 'coa_attachment',
+                input: coaFile,
+                invalid: false
+              }">
+            </ng-container>
+
+            <small class="error">
+              {{ fileErrors['coa_attachment'] }}
+            </small>
+
+          </div>
+
+
+          <!-- EXPERIENCE WITH ZYDUS -->
+          <div class="enterprise-question">
+
+            <label class="label-text">
+              Experience with Zydus Group.
+              (Please attach all latest certificates)
+            </label>
+
+            <label class="radio-option">
+              <input type="radio" name="experience_with_zydus" [(ngModel)]="vendor.experience_with_zydus" value="Yes">
+              <span>Yes</span>
+            </label>
+
+            <label class="radio-option">
+              <input type="radio" name="experience_with_zydus" [(ngModel)]="vendor.experience_with_zydus" value="No">
+              <span>No</span>
+            </label>
+
+
+            <!-- ZYDUS FILE -->
+            <label *ngIf="vendor.experience_with_zydus === 'Yes'">
+
+              <span class="label-text">
+                Upload certificates
+              </span>
+
+              <input #zydusFile class="native-file" type="file" name="experience_with_zydus_attachment"
+                accept=".pdf,.jpg,.jpeg,.png" (change)="onFileSelected($event, 'experience_with_zydus_attachment')">
+
+              <ng-container *ngTemplateOutlet="fileBox; context: {
+                  field: 'experience_with_zydus_attachment',
+                  input: zydusFile,
+                  invalid: false
+                }">
+              </ng-container>
+
+              <small class="error">
+                {{ fileErrors['experience_with_zydus_attachment'] }}
+              </small>
+
+            </label>
+
+          </div>
+
+        </div>
+      </section>
+
+
+
+      <!-- 6. FINANCIAL STATUS -->
+      <section class="form-section">
+
+        <h3>Financial Status</h3>
+
+        <div class="form-grid upload-grid financial-grid">
+
+          <!-- TURNOVER -->
+          <label>
+
+            <span class="label-text">
+              Turnover of the Enterprise (for last three years):
+            </span>
+
+            <input #turnoverFile class="native-file" type="file" name="turnover_attachment"
+              accept=".pdf,.jpg,.jpeg,.png" (change)="onFileSelected($event, 'turnover_attachment')">
+
+            <ng-container *ngTemplateOutlet="fileBox; context: {
+                field: 'turnover_attachment',
+                input: turnoverFile,
+                invalid: false
+              }">
+            </ng-container>
+
+            <small class="error">
+              {{ fileErrors['turnover_attachment'] }}
+            </small>
+
+          </label>
+
+
+          <!-- ASSETS -->
+          <label>
+
+            <span class="label-text">Assets Details:</span>
+
+            <input #assetsFile class="native-file" type="file" name="assets_attachment" accept=".pdf,.jpg,.jpeg,.png"
+              (change)="onFileSelected($event, 'assets_attachment')">
+
+            <ng-container *ngTemplateOutlet="fileBox; context: {
+                field: 'assets_attachment',
+                input: assetsFile,
+                invalid: false
+              }">
+            </ng-container>
+
+            <small class="error">
+              {{ fileErrors['assets_attachment'] }}
+            </small>
+
+          </label>
+
+
+          <!-- LIABILITIES -->
+          <label>
+
+            <span class="label-text">Liabilities:</span>
+
+            <input #liabilitiesFile class="native-file" type="file" name="liabilities_attachment"
+              accept=".pdf,.jpg,.jpeg,.png" (change)="onFileSelected($event, 'liabilities_attachment')">
+
+            <ng-container *ngTemplateOutlet="fileBox; context: {
+                field: 'liabilities_attachment',
+                input: liabilitiesFile,
+                invalid: false
+              }">
+            </ng-container>
+
+            <small class="error">
+              {{ fileErrors['liabilities_attachment'] }}
+            </small>
+
+          </label>
+
+
+          <!-- IT RETURN -->
+          <label>
+
+            <span class="label-text">
+              Attach Financial Statements OR IT Return Last Three Year:
+            </span>
+
+            <input #itReturnFile class="native-file" type="file" name="it_return_attachment"
+              accept=".pdf,.jpg,.jpeg,.png" (change)="onFileSelected($event, 'it_return_attachment')">
+
+            <ng-container *ngTemplateOutlet="fileBox; context: {
+                field: 'it_return_attachment',
+                input: itReturnFile,
+                invalid: false
+              }">
+            </ng-container>
+
+            <small class="error">
+              {{ fileErrors['it_return_attachment'] }}
+            </small>
+
+          </label>
+
+        </div>
+      </section>
+
+
+
+      <!-- 7. LIST OF CLIENTS -->
+      <section class="form-section">
+
+        <h3>
+          List of Clients along with Contact Persons Name,
+          Telephone No, Address, E-mail Address & Fax No.
+        </h3>
+
+        <label>
+
+          Please attach list:
+
+          <input #clientFile class="native-file" type="file" name="client_details" accept=".pdf,.jpg,.jpeg,.png"
+            (change)="onFileSelected($event, 'client_details')">
+
+          <ng-container *ngTemplateOutlet="fileBox; context: {
+              field: 'client_details',
+              input: clientFile,
+              invalid: false
+            }">
+          </ng-container>
+
+          <small class="error">
+            {{ fileErrors['client_details'] }}
+          </small>
+
+        </label>
+
+      </section>
+
+
+
+      <!-- 8. BANK DETAILS -->
+      <section class="form-section">
+
+        <h3>Bank Details</h3>
+
+        <div class="form-grid">
+
+          <!-- BANK NAME -->
+          <label>
+
+            <span class="label-text">
+              Bank Name: <span class="required">*</span>
+            </span>
+
+            <input name="bank_name" [(ngModel)]="vendor.bank_name" #bankCtrl="ngModel" required maxlength="100"
+              placeholder="Enter Bank Name"
+              [class.invalid-field]="(bankCtrl.invalid && (bankCtrl.touched || vendorForm.submitted)) || !!serverErrors['bank_name']">
+
+            <small class="validation-error" *ngIf="bankCtrl.invalid && (bankCtrl.touched || vendorForm.submitted)">
+              Bank Name is required!
+            </small>
+
+            <small class="validation-error" *ngIf="serverErrors['bank_name']">
+              {{ serverErrors['bank_name'] }}
+            </small>
+
+          </label>
+
+
+          <!-- BRANCH NAME -->
+          <label>
+
+            <span class="label-text">
+              Branch Name: <span class="required">*</span>
+            </span>
+
+            <input name="branch_name" [(ngModel)]="vendor.branch_name" #branchCtrl="ngModel" required maxlength="150"
+              placeholder="Enter Branch Name"
+              [class.invalid-field]="(branchCtrl.invalid && (branchCtrl.touched || vendorForm.submitted)) || !!serverErrors['branch_name']">
+
+            <small class="validation-error" *ngIf="branchCtrl.invalid && (branchCtrl.touched || vendorForm.submitted)">
+              Branch Name is required!
+            </small>
+
+            <small class="validation-error" *ngIf="serverErrors['branch_name']">
+              {{ serverErrors['branch_name'] }}
+            </small>
+
+          </label>
+
+
+          <!-- ACCOUNT NAME -->
+          <label>
+
+            <span class="label-text">
+              A/c. Name: <span class="required">*</span>
+            </span>
+
+            <input name="ac_name" [(ngModel)]="vendor.ac_name" #acNameCtrl="ngModel" required maxlength="100"
+              placeholder="Enter Account Name"
+              [class.invalid-field]="(acNameCtrl.invalid && (acNameCtrl.touched || vendorForm.submitted)) || !!serverErrors['ac_name']">
+
+            <small class="validation-error" *ngIf="acNameCtrl.invalid && (acNameCtrl.touched || vendorForm.submitted)">
+              Account Name is required!
+            </small>
+
+            <small class="validation-error" *ngIf="serverErrors['ac_name']">
+              {{ serverErrors['ac_name'] }}
+            </small>
+
+          </label>
+
+
+          <!-- IFSC CODE -->
+          <label>
+
+            <span class="label-text">
+              IFSC Code: <span class="required">*</span>
+            </span>
+
+            <input data-field="ifsc_code" name="ifsc_code" [(ngModel)]="vendor.ifsc_code" #ifscCtrl="ngModel" required
+              maxlength="11" placeholder="Enter IFSC Code (e.g. SBIN0001234)"
+              [class.invalid-field]="(ifscCtrl.invalid && (ifscCtrl.touched || vendorForm.submitted)) || !!serverErrors['ifsc_code']">
+
+            <small class="validation-error"
+              *ngIf="ifscCtrl.hasError('required') && (ifscCtrl.touched || vendorForm.submitted)">
+              IFSC Code is required!
+            </small>
+
+            <small class="validation-error" *ngIf="serverErrors['ifsc_code']">
+              {{ serverErrors['ifsc_code'] }}
+            </small>
+
+          </label>
+
+
+          <!-- ACCOUNT NUMBER -->
+          <label>
+
+            <span class="label-text">
+              A/c. No: <span class="required">*</span>
+            </span>
+
+            <input data-field="ac_no" name="ac_no" [(ngModel)]="vendor.ac_no" #acCtrl="ngModel" required
+              autocomplete="off" appNumbersOnly maxlength="18" inputmode="numeric" placeholder="Enter A/c. Number"
+              [class.invalid-field]="(acCtrl.invalid && (acCtrl.touched || vendorForm.submitted)) || !!serverErrors['ac_no']">
+
+            <small class="validation-error"
+              *ngIf="acCtrl.hasError('required') && (acCtrl.touched || vendorForm.submitted)">
+              Account Number is required!
+            </small>
+
+            <small class="validation-error" *ngIf="serverErrors['ac_no']">
+              {{ serverErrors['ac_no'] }}
+            </small>
+
+          </label>
+
+
+          <!-- CONFIRM ACCOUNT NUMBER -->
+          <label>
+
+            <span class="label-text">
+              Re-Enter A/c. No: <span class="required">*</span>
+            </span>
+
+            <input data-field="confirm_ac_no" name="confirm_ac_no" [(ngModel)]="vendor.confirm_ac_no"
+              #confirmCtrl="ngModel" required autocomplete="off" appNumbersOnly maxlength="18" inputmode="numeric"
+              placeholder="Re-Enter A/c. Number"
+              [class.invalid-field]="(confirmCtrl.invalid && (confirmCtrl.touched || vendorForm.submitted)) || !!serverErrors['confirm_ac_no']">
+
+            <small class="validation-error"
+              *ngIf="confirmCtrl.hasError('required') && (confirmCtrl.touched || vendorForm.submitted)">
+              Confirm Account Number is required!
+            </small>
+
+            <small class="validation-error" *ngIf="serverErrors['confirm_ac_no']">
+              {{ serverErrors['confirm_ac_no'] }}
+            </small>
+
+          </label>
+
+        </div>
+      </section>
+
+
+
+      <!-- 9. REQUIRED DOCUMENTS -->
+      <section class="form-section">
+
+        <h3>
+          Mentioned Below Documents Copy must be requiring (Only File Type)
+        </h3>
+
+        <p class="hint">
+          Allowed formats: PDF, JPG, PNG.
+          Maximum size: 5 MB per file.
+        </p>
+
+        <div class="form-grid upload-grid">
+
+          <!-- CANCELLED CHEQUE -->
+          <label>
+
+            <span class="label-text">
+              Cancelled Cheque: <span class="required">*</span>
+            </span>
+
+            <input #chequeFile class="native-file" type="file" name="cancel_cheque_attachment"
+              accept=".pdf,.jpg,.jpeg,.png"
+              (change)="onFileSelected($event, 'cancel_cheque_attachment'); chequeFile.dataset['touched'] = 'true'"
+              (cancel)="chequeFile.dataset['touched'] = 'true'">
+
+            <ng-container *ngTemplateOutlet="fileBox; context: {
+                field: 'cancel_cheque_attachment',
+                input: chequeFile,
+                invalid: fileInvalid('cancel_cheque_attachment', chequeFile) && (chequeFile.dataset['touched'] === 'true' || vendorForm.submitted)
+              }">
+            </ng-container>
+
+            <small class="validation-error"
+              *ngIf="fileInvalid('cancel_cheque_attachment', chequeFile) && (chequeFile.dataset['touched'] === 'true' || vendorForm.submitted)">
+              {{ fileErrors['cancel_cheque_attachment'] || 'Cancelled Cheque is required!' }}
+            </small>
+
+          </label>
+
+
+          <!-- COMPANY REGISTRATION -->
+          <label>
+
+            <span class="label-text">
+              Company Registration <span class="required">*</span>
+            </span>
+
+            <input #companyFile class="native-file" type="file" name="company_registration_attachment"
+              accept=".pdf,.jpg,.jpeg,.png"
+              (change)="onFileSelected($event, 'company_registration_attachment'); companyFile.dataset['touched'] = 'true'"
+              (cancel)="companyFile.dataset['touched'] = 'true'">
+
+            <ng-container *ngTemplateOutlet="fileBox; context: {
+                field: 'company_registration_attachment',
+                input: companyFile,
+                invalid: fileInvalid('company_registration_attachment', companyFile) && (companyFile.dataset['touched'] === 'true' || vendorForm.submitted)
+              }">
+            </ng-container>
+
+            <small class="validation-error"
+              *ngIf="fileInvalid('company_registration_attachment', companyFile) && (companyFile.dataset['touched'] === 'true' || vendorForm.submitted)">
+              {{ fileErrors['company_registration_attachment'] || 'Company Registration is required!' }}
+            </small>
+
+          </label>
+
+
+          <!-- AUTHORIZATION LETTER -->
+          <label>
+
+            <span class="label-text">
+              Authorization Letter:
+            </span>
+
+            <input #authFile class="native-file" type="file" name="authorization_letter_attachment"
+              accept=".pdf,.jpg,.jpeg,.png" (change)="onFileSelected($event, 'authorization_letter_attachment')">
+
+            <ng-container *ngTemplateOutlet="fileBox; context: {
+                field: 'authorization_letter_attachment',
+                input: authFile,
+                invalid: false
+              }">
+            </ng-container>
+
+            <small class="error">
+              {{ fileErrors['authorization_letter_attachment'] }}
+            </small>
+
+          </label>
+
+        </div>
+      </section>
+
+
+
+      <!-- GENERAL ERROR MESSAGE -->
+      <p class="validation-error" *ngIf="message">
+        {{ message }}
+      </p>
+
+
+
+      <!-- FORM FOOTER / ACTION BUTTONS -->
+      <div class="form-footer">
+
+        <div class="form-actions">
+
+          <button *ngIf="!isRenew" type="button" class="clear-btn" [disabled]="isSubmitting"
+            (click)="resetVendorForm(vendorForm)">
+            Clear
+          </button>
+
+          <button *ngIf="isRenew" type="button" class="clear-btn" [disabled]="isSubmitting" (click)="cancelRenew()">
+            Back
+          </button>
+
+          <button type="submit" class="submit-btn" [disabled]="isSubmitting">
+            {{
+            isSubmitting
+            ? (isRenew
+            ? 'Renewing...'
+            : isUpdate
+            ? 'Updating...'
+            : 'Submitting...')
+            : (isRenew
+            ? 'Renew'
+            : isUpdate
+            ? 'Update'
+            : 'Submit')
+            }}
+
+          </button>
+
+        </div>
+      </div>
+
+    </form>
+
+  </main>
+
+  <!-- MASTER MANAGE DIALOG (admin only, sirf Category) -->
+  <app-common-master-dialog *ngIf="isAdmin && masterDialog.open" [title]="masterDialog.title"
+    (closed)="onMasterDialogClosed($event)">
+  </app-common-master-dialog>
+
+
+  <!-- FILE PREVIEW WINDOW -->
+  <div class="preview-window" *ngIf="preview.open" [style.left.px]="preview.x" [style.top.px]="preview.y">
+
+    <!-- PREVIEW HEADER -->
+    <div class="preview-header" (pointerdown)="startDrag($event)">
+
+      <span class="preview-grip" title="Drag to move">
+        <i></i>
+        <i></i>
+        <i></i>
+        <i></i>
+        <i></i>
+        <i></i>
+      </span>
+
+      <span class="preview-title">
+        {{ preview.title }}
+      </span>
+
+      <button type="button" class="preview-close" title="Close" (pointerdown)="$event.stopPropagation()"
+        (click)="closePreview()">
+        ✕
+      </button>
+
+    </div>
+
+
+    <!-- PREVIEW BODY -->
+    <div class="preview-body">
+
+      <img *ngIf="!preview.isPdf && !preview.failed" [src]="preview.url" alt="Preview" draggable="false"
+        (error)="preview.failed = true">
+
+      <iframe *ngIf="preview.isPdf && !preview.failed" [src]="preview.safeUrl" title="PDF preview">
+      </iframe>
+
+      <p class="preview-fail" *ngIf="preview.failed">
+
+        Preview load nahi ho paya.
+
+        <a [href]="preview.url" target="_blank">
+          Naye tab me kholo
+        </a>
+
+      </p>
+
+    </div>
+
+
+    <!-- PREVIEW FILE NAME -->
+    <div class="preview-name">
+      {{ preview.name }}
+    </div>
+
+  </div>
+
+
+
+  <!-- HOVER THUMBNAIL PREVIEW -->
+  <div class="hover-preview" *ngIf="hover.show" [style.left.px]="hover.x" [style.top.px]="hover.y">
+
+    <img *ngIf="!hover.isPdf" [src]="hover.url" alt="">
+
+    <div *ngIf="hover.isPdf" class="hover-pdf">
+
+      <strong>PDF</strong>
+
+      <span>
+        {{ hover.name }}
+      </span>
+
+    </div>
+
+  </div>
+
+</div>

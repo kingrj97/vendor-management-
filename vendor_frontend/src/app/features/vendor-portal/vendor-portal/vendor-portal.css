@@ -1,0 +1,421 @@
+/* =====================================================
+   HOST / ROOT
+===================================================== */
+
+:host {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+
+  /* Responsive spacing tokens: screen ke saath smoothly chhote-bade */
+  --topbar-pad-x: clamp(8px, 2vw, 24px);
+  --content-pad: clamp(10px, 2.2vw, 24px);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* =====================================================
+   MAIN LAYOUT
+===================================================== */
+
+.layout {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  background: #f3f5f9;
+  overflow: hidden;
+}
+
+/* =====================================================
+   MAIN CONTENT AREA
+===================================================== */
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* =====================================================
+   TOPBAR
+   viewport-fit=cover hone ki wajah se notch / status bar
+   ke neeche na jaye, isliye safe-area padding joda hai
+===================================================== */
+
+.topbar {
+  min-height: 64px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-right: max(var(--topbar-pad-x), env(safe-area-inset-right, 0px));
+  padding-bottom: 0;
+  padding-left: max(var(--topbar-pad-x), env(safe-area-inset-left, 0px));
+
+  background: #fff;
+
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+
+  position: relative;
+  z-index: 5;
+}
+
+/* =====================================================
+   PAGE TITLE
+===================================================== */
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  min-width: 0;
+  flex: 0 1 auto;
+  max-width: calc(100% - 60px);
+
+  padding: 6px 16px 6px 12px;
+
+  border-left: 4px solid #5b3fd9;
+  border-radius: 4px;
+}
+
+.page-title-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #dbe7fb;
+  color: #365789;
+  border-radius: 10px;
+}
+
+.page-title-text {
+  min-width: 0;
+
+  font-size: 18px;
+  font-weight: 700;
+  color: #0b1530;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* =====================================================
+   USER MENU
+===================================================== */
+
+.user-menu {
+  position: relative;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* =====================================================
+   AVATAR BUTTON / ACCOUNT ICON
+===================================================== */
+
+.avatar-btn {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 2px solid transparent;
+  border-radius: 50%;
+
+  background: transparent;
+  color: #365789;
+
+  cursor: pointer;
+
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.avatar-btn mat-icon {
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 36px;
+  line-height: 36px;
+}
+
+.avatar-btn:hover {
+  background: #eef3fa;
+  border-color: #365789;
+}
+
+.avatar-btn:focus-visible {
+  outline: 2px solid #1a73e8;
+  outline-offset: 2px;
+}
+
+/* =====================================================
+   USER DROPDOWN
+===================================================== */
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+
+  width: 190px;
+  min-width: 170px;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100vh - 80px);
+  max-height: calc(100dvh - 80px);
+  overflow-y: auto;
+
+  padding: 6px;
+
+  background: #fff;
+  border-radius: 10px;
+
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+
+  z-index: 20;
+}
+
+.dropdown-user {
+  padding: 10px 12px;
+  margin-bottom: 4px;
+
+  font-weight: 600;
+  color: #222;
+
+  border-bottom: 1px solid #eee;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dropdown-item {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  background: none;
+  border: 0;
+  border-radius: 6px;
+
+  color: #c62828;
+  font-size: 15px;
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background: #fdecea;
+}
+
+.dropdown-item:focus-visible {
+  outline: 2px solid #1a73e8;
+  outline-offset: -2px;
+}
+
+/* =====================================================
+   PAGE CONTENT
+   Neeche ka home bar / safe area bhi chhoda gaya hai
+===================================================== */
+
+.content {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+
+  padding-top: var(--content-pad);
+  padding-right: max(var(--content-pad), env(safe-area-inset-right, 0px));
+  padding-bottom: max(var(--content-pad), env(safe-area-inset-bottom, 0px));
+  padding-left: max(var(--content-pad), env(safe-area-inset-left, 0px));
+
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* =====================================================
+   LARGE SCREENS (1600px+)
+===================================================== */
+
+@media (min-width: 1600px) {
+  .topbar {
+    min-height: 68px;
+  }
+
+  .page-title-text {
+    font-size: 20px;
+  }
+}
+
+/* =====================================================
+   TABLET RESPONSIVE
+===================================================== */
+
+@media (max-width: 1024px) {
+  .topbar {
+    gap: 12px;
+  }
+}
+
+/* =====================================================
+   MOBILE RESPONSIVE
+===================================================== */
+
+@media (max-width: 768px) {
+  .topbar {
+    min-height: 56px;
+    gap: 10px;
+  }
+
+  .page-title {
+    gap: 9px;
+    padding: 5px 10px 5px 8px;
+  }
+
+  .page-title-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .page-title-text {
+    font-size: 16px;
+  }
+}
+
+/* =====================================================
+   SMALL MOBILE
+===================================================== */
+
+@media (max-width: 480px) {
+  .topbar {
+    min-height: 54px;
+    gap: 8px;
+  }
+
+  .page-title {
+    max-width: calc(100% - 48px);
+    padding: 5px 6px 5px 8px;
+  }
+
+  .page-title-icon {
+    display: none;
+  }
+
+  .page-title-text {
+    font-size: 15px;
+  }
+
+  .avatar-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .avatar-btn mat-icon {
+    width: 34px;
+    height: 34px;
+
+    font-size: 34px;
+    line-height: 34px;
+  }
+
+  .dropdown {
+    right: -4px;
+    width: 180px;
+  }
+}
+
+/* =====================================================
+   EXTRA SMALL MOBILE
+===================================================== */
+
+@media (max-width: 360px) {
+  .page-title-text {
+    font-size: 14px;
+  }
+
+  .dropdown {
+    right: -2px;
+    min-width: 160px;
+  }
+}
+
+/* =====================================================
+   TOUCH DEVICES: bade tap targets
+===================================================== */
+
+@media (hover: none) and (pointer: coarse) {
+  .avatar-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .avatar-btn:hover {
+    background: transparent;
+    border-color: transparent;
+  }
+
+  .dropdown-item {
+    min-height: 48px;
+  }
+}
+
+/* =====================================================
+   SHORT SCREENS (phone landscape)
+===================================================== */
+
+@media (max-height: 480px) {
+  .topbar {
+    min-height: 48px;
+  }
+
+  .content {
+    padding-top: 8px;
+    padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* =====================================================
+   REDUCED MOTION
+===================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .avatar-btn {
+    transition: none;
+  }
+}

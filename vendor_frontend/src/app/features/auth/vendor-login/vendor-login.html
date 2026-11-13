@@ -1,0 +1,169 @@
+
+<div class="login-page">
+  <div class="login-wrapper">
+
+    <!-- Login Card -->
+    <main class="login-card">
+
+      <!-- Header -->
+      <div class="login-topbar">
+
+        <header class="card-header">
+          <h1>Vendor Login</h1>
+        </header>
+
+        <div class="logo-area">
+          <img
+            src="/favicon.png"
+            alt="Zydus Hospitals"
+            class="hospital-logo"
+          />
+        </div>
+
+      </div>
+
+      <!-- Card Body -->
+      <div class="card-body">
+
+        <h2>Enter Login Details</h2>
+
+        <form
+          #loginForm="ngForm"
+          (ngSubmit)="login(loginForm)"
+          novalidate
+        >
+
+          <div class="login-panel">
+
+            <!-- Mobile Number -->
+            <div class="form-group">
+
+              <label for="mobile">
+                Mobile <span class="required">*</span>
+              </label>
+
+              <div class="mobile-input">
+
+                <input
+                  id="mobile"
+                  name="mobile"
+                  type="tel"
+                  [(ngModel)]="mobile"
+                  required
+                  appNumbersOnly
+                  pattern="[0-9]{10}"
+                  maxlength="10"
+                  inputmode="numeric"
+                  autocomplete="tel"
+                  placeholder="Enter Mobile Number"
+                  [disabled]="otpSending() || loggingIn()"
+                />
+
+                <button
+                  type="button"
+                  class="otp-button"
+                  [disabled]="
+                    otpSending() ||
+                    loggingIn() ||
+                    resendSeconds() > 0
+                  "
+                  (click)="sendOtp(loginForm)"
+                >
+                  {{
+                    otpSending()
+                      ? 'Sending...'
+                      : resendSeconds() > 0
+                        ? 'Resend OTP in ' + resendSeconds() + 's'
+                        : otpSent()
+                          ? 'Resend OTP'
+                          : 'Send OTP'
+                  }}
+                </button>
+
+              </div>
+
+              <small class="hint">
+                Enter your 10-digit mobile number.
+              </small>
+
+            </div>
+
+            <!-- OTP -->
+            <div class="form-group">
+
+              <label for="otp">
+                OTP <span class="required">*</span>
+              </label>
+
+              <input
+                id="otp"
+                name="otp"
+                type="text"
+                [(ngModel)]="otp"
+                required
+                pattern="[0-9]{6}"
+                maxlength="6"
+                appNumbersOnly
+                inputmode="numeric"
+                autocomplete="one-time-code"
+                placeholder="Enter 6-digit OTP"
+                [disabled]="!otpSent() || loggingIn()"
+              />
+
+              <small class="hint" *ngIf="!otpSent()">
+                Please send OTP to your mobile number first.
+              </small>
+
+              <small class="hint" *ngIf="otpSent()">
+                Enter the 6-digit OTP sent to your mobile.
+              </small>
+
+            </div>
+
+            <!-- Status Message -->
+            <p
+              class="status-message"
+              role="status"
+              aria-live="polite"
+            >
+              {{ message() }}
+            </p>
+
+            <!-- Login Button -->
+            <div class="login-actions">
+
+              <button
+                type="submit"
+                class="login-button"
+                [disabled]="!otpSent() || loggingIn() || otpSending()"
+              >
+                {{
+                  loggingIn()
+                    ? 'Verifying...'
+                    : 'Login'
+                }}
+              </button>
+
+              <!-- Register Link -->
+              <div class="register-link">
+
+                <span>Don't have an account?</span>
+
+                <a routerLink="/register">
+                  Register here
+                </a>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    </main>
+
+  </div>
+</div>

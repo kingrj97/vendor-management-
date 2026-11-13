@@ -1,0 +1,108 @@
+<div class="login-page">
+  <div class="login-wrapper">
+
+    <main class="login-card">
+
+      <div class="login-topbar">
+        <header class="card-header">
+          <h1>Verify Mobile Number</h1>
+        </header>
+
+        <div class="logo-area">
+          <img src="/favicon.png" alt="Zydus Hospitals" class="hospital-logo" />
+        </div>
+      </div>
+
+      <div class="card-body">
+
+        <!-- OTP FORM -->
+        <ng-container *ngIf="!verified">
+
+          <h2>Please verify your mobile number</h2>
+
+          <p class="verify-instruction">
+            We have sent a 6-digit OTP to your registered mobile number.
+            Please enter the OTP below to verify your mobile number.
+          </p>
+
+          <form #otpForm="ngForm" (ngSubmit)="verifyOtp(otpForm)" novalidate>
+
+            <div class="login-panel">
+
+              <div class="form-group">
+                <label for="otp">
+                  OTP <span class="required">*</span>
+                </label>
+
+                <input id="otp" name="otp" type="text" [(ngModel)]="otp" required pattern="[0-9]{6}" appNumbersOnly
+                  maxlength="6" inputmode="numeric" autocomplete="one-time-code" placeholder="Enter 6 digit OTP" />
+              </div>
+
+              <p class="status-message" [class.error-message]="isError" role="status" aria-live="polite">
+                {{ message }}
+              </p>
+
+              <div class="login-actions">
+
+                <button type="submit" class="login-button" [disabled]="verifying">
+                  {{ verifying ? 'Verifying...' : 'Verify OTP' }}
+                </button>
+
+                <button type="button" class="resend-button" [disabled]="resendSeconds > 0 || resending"
+                  (click)="resendOtp()">
+                  {{
+                  resending
+                  ? 'Sending...'
+                  : resendSeconds > 0
+                  ? 'Resend OTP in ' + resendSeconds + 's'
+                  : 'Resend OTP'
+                  }}
+                </button>
+
+              </div>
+            </div>
+          </form>
+        </ng-container>
+
+        <!-- THANK YOU -->
+        <div class="thank-you" *ngIf="verified">
+
+          <h2>Thank You!</h2>
+
+          <!-- LOGIN MOBILE VERIFICATION -->
+          <p *ngIf="mode === 'login'">
+            Your mobile number is verified successfully.
+            You can now login to your account.
+          </p>
+
+          <!-- REGISTRATION -->
+          <p *ngIf="mode === 'register'">
+            Your mobile number is verified and your registration
+            has been submitted successfully.
+          </p>
+
+          <!-- RENEWA -->
+          <p *ngIf="isRenew">
+            Your mobile number is verified and your details
+            have been renewed successfully.
+          </p>
+
+          <!-- UPDATE -->
+          <p *ngIf="isUpdate">
+            Your mobile number is verified and your details
+            have been updated successfully.
+          </p>
+
+          <div class="login-actions">
+            <button type="button" class="login-button" (click)="goNext()">
+              {{ mode === 'login' ? 'Go to Login' : 'OK' }}
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+</div>

@@ -1,0 +1,176 @@
+<div class="list-page">
+
+  <!-- LOADING -->
+  <p class="state-msg" *ngIf="loading">
+    Loading...
+  </p>
+
+  <!-- EMPTY STATE -->
+  <p class="state-msg" *ngIf="!loading && !vendors.length">
+    No vendors found.
+  </p>
+
+  <!-- VENDOR CARDS -->
+  <div class="vendor-card" *ngFor="let v of sortedVendors; trackBy: trackById">
+
+    <!-- CARD HEADER -->
+    <div class="card-head">
+
+      <div class="card-title">
+
+        <h2>{{ v.name }}</h2>
+
+        <span class="code-chip" *ngIf="hasValue(v, 'vendor_code')">
+
+          {{ v.vendor_code }}
+
+        </span>
+
+        <span class="status-chip" *ngIf="hasValue(v, 'status')" [ngClass]="getStatusClass(v.status)">
+
+          {{ v.status | titlecase }}
+
+        </span>
+
+      </div>
+
+      <!-- UPDATE / RENEW BUTTON -->
+      <button type="button" class="action-btn" *ngIf="canUpdate(v) || canRenew(v)" [ngClass]="{
+          'update-btn': canUpdate(v),
+          'renew-btn': canRenew(v)
+        }" (click)="onVendorAction(v)">
+
+        {{ canRenew(v) ? 'Renew' : 'Update' }}
+
+      </button>
+
+    </div>
+
+    <!-- VENDOR SECTIONS -->
+    <section class="form-section" *ngFor="let s of sectionsOf(v); trackBy: trackByTitle">
+
+      <h3>{{ s.title }}</h3>
+
+      <div class="form-grid">
+
+        <div class="field" *ngFor="let f of s.fields; trackBy: trackByKey" [class.full]="f.full">
+
+          <span class="label-text">
+            {{ f.label }}
+          </span>
+
+          <!-- FILE FIELD -->
+          <div class="file-box" *ngIf="f.type === 'file'; else textValue">
+
+            <svg class="clip" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" aria-hidden="true">
+
+              <path
+                d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+
+            </svg>
+
+            <span class="file-name">
+              {{ fileName(v, f.key) }}
+            </span>
+
+            <a class="file-view" role="button" tabindex="0" [href]="fileUrl(v, f.key)"
+              (click)="openPreview($event, v, f)" (keydown.enter)="openPreview($event, v, f)">
+
+              View
+
+            </a>
+
+          </div>
+
+          <!-- TEXT FIELD -->
+          <ng-template #textValue>
+
+            <div class="readonly-box">
+              {{ text(v, f.key) }}
+            </div>
+
+          </ng-template>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </div>
+
+  <!-- FILE PREVIEW WINDOW -->
+  <div class="preview-window" *ngIf="preview.open" [style.left.px]="preview.x" [style.top.px]="preview.y">
+
+    <!-- PREVIEW HEADER -->
+    <div class="preview-header">
+
+      <span class="preview-grip" title="Drag to move" (pointerdown)="startDrag($event)">
+
+        <i></i>
+        <i></i>
+        <i></i>
+        <i></i>
+        <i></i>
+        <i></i>
+
+      </span>
+
+      <span class="preview-title">
+        {{ preview.title }}
+      </span>
+
+      <button type="button" class="preview-close" title="Close" aria-label="Close preview"
+        (pointerdown)="$event.stopPropagation()" (click)="closePreview()">
+
+        ✕
+
+      </button>
+
+    </div>
+
+    <!-- PREVIEW BODY -->
+    <div class="preview-body">
+
+      <p class="preview-msg" *ngIf="preview.loading">
+
+        Loading...
+
+      </p>
+
+      <p class="preview-msg error" *ngIf="preview.error">
+
+        {{ preview.error }}
+
+      </p>
+
+      <ng-container *ngIf="!preview.loading && !preview.error">
+
+        <!-- PDF -->
+        <iframe *ngIf="preview.kind === 'pdf'" [src]="preview.safeUrl" title="PDF preview">
+        </iframe>
+        
+        <!-- IMAGE -->
+        <img *ngIf="preview.kind === 'image'" [src]="preview.url" [alt]="preview.title" draggable="false">
+
+        <!-- OTHER FILE -->
+        <p class="preview-msg" *ngIf="preview.kind === 'other'">
+
+          Is file type ka preview nahi ho sakta.
+
+          <a [href]="preview.url" [attr.download]="preview.title">
+
+            Download karo
+
+          </a>
+
+        </p>
+
+      </ng-container>
+
+    </div>
+
+  </div>
+
+</div>

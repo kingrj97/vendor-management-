@@ -1,0 +1,541 @@
+:host {
+  display: block;
+
+  --navy: #0b1f4d;
+  --blue: #2563eb;
+  --ink: #0f1b3d;
+  --muted: #64708f;
+  --line: #e6ebf5;
+  --bg: #f3f6fc;
+
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--ink);
+
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.material-symbols-rounded {
+  font-size: 20px;
+  line-height: 1;
+  font-variation-settings: 'FILL' 1;
+}
+
+small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.grow {
+  flex: 1;
+}
+
+/* Main Layout */
+
+.shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--bg);
+  transition: grid-template-columns .25s ease;
+}
+
+.backdrop {
+  display: none;
+}
+
+/* Sidebar */
+
+.sidebar {
+  background: linear-gradient(180deg, #0b1f4d, #0a1a40);
+  color: #fff;
+
+  padding: 20px 14px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+
+  position: sticky;
+  top: 0;
+
+  /* 100dvh: mobile browser ki address bar se height nahi bigadti */
+  height: 100vh;
+  height: 100dvh;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+
+  min-width: 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 6px;
+}
+
+.brand-logo {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  background: #fff;
+  border-radius: 10px;
+  padding: 4px;
+  flex: none;
+}
+
+.brand strong {
+  font-size: 15px;
+  display: block;
+}
+
+.brand small {
+  color: #c7d2ee;
+}
+
+/* Navigation */
+
+nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  min-height: 44px;
+  padding: 11px 14px;
+
+  border-radius: 10px;
+
+  color: #dbe4f7;
+  text-decoration: none;
+
+  font-size: 14px;
+
+  transition: background .2s ease;
+}
+
+.nav-item .grow {
+  white-space: nowrap;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, .08);
+}
+
+.nav-item.active {
+  background: linear-gradient(90deg, #2563eb, #3b82f6);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Sidebar Promo */
+
+.promo {
+  margin-top: auto;
+
+  border-radius: 14px;
+  padding: 22px 16px;
+
+  text-align: center;
+
+  background: linear-gradient(160deg, #1d4ed8, #0b2a73);
+
+  display: grid;
+  gap: 8px;
+  place-items: center;
+
+  min-height: 150px;
+}
+
+.promo .material-symbols-rounded {
+  font-size: 34px;
+}
+
+/* Main */
+
+.main {
+  display: flex;
+  flex-direction: column;
+
+  min-width: 0;
+
+  height: 100vh;
+  height: 100dvh;
+
+  overflow: hidden;
+}
+
+/* Content */
+
+.content {
+  padding: 16px 18px 24px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 16px;
+
+  min-width: 0;
+  flex: 1;
+  min-height: 0;
+
+  overflow-y: auto;
+}
+
+/* Header */
+
+.topbar {
+  flex: none;
+
+  position: sticky;
+  top: 0;
+  z-index: 30;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+
+  height: 72px;
+
+  padding: 0 20px;
+
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+
+  box-shadow: 0 2px 8px rgba(15, 27, 61, .05);
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+/* Header Buttons */
+
+.icon-btn {
+  position: relative;
+
+  background: none;
+  border: 0;
+
+  cursor: pointer;
+  touch-action: manipulation;
+
+  color: var(--ink);
+
+  /* touch target kam se kam 44px */
+  min-width: 44px;
+  min-height: 44px;
+
+  padding: 8px;
+  border-radius: 10px;
+
+  display: grid;
+  place-items: center;
+}
+
+.icon-btn:hover {
+  background: #eef2fa;
+}
+
+.icon-btn .material-symbols-rounded {
+  font-size: 26px;
+}
+
+/* User Menu */
+
+.user-menu {
+  position: relative;
+  margin-left: 8px;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  min-height: 44px;
+
+  background: none;
+  border: 0;
+
+  cursor: pointer;
+  touch-action: manipulation;
+
+  font: inherit;
+  color: inherit;
+
+  padding: 4px 8px;
+  border-radius: 12px;
+
+  text-align: left;
+}
+
+.user:hover {
+  background: #eef2fa;
+}
+
+.user-text {
+  min-width: 0;
+}
+
+.user-text strong {
+  font-size: 14px;
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.avatar {
+  width: 42px;
+  height: 42px;
+
+  border-radius: 50%;
+
+  background: var(--blue);
+  color: #fff;
+
+  display: grid;
+  place-items: center;
+
+  font-weight: 700;
+  font-size: 14px;
+
+  flex: none;
+}
+
+.chev {
+  transition: transform .2s ease;
+  color: var(--muted);
+}
+
+.chev.up {
+  transform: rotate(180deg);
+}
+
+/* Dropdown */
+
+.dropdown {
+  position: absolute;
+
+  right: 0;
+  top: calc(100% + 8px);
+
+  min-width: 170px;
+  max-width: calc(100vw - 20px);
+
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+
+  box-shadow: 0 10px 30px rgba(15, 27, 61, .15);
+
+  padding: 6px;
+
+  z-index: 60;
+}
+
+.dropdown-item {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  min-height: 44px;
+
+  background: none;
+  border: 0;
+
+  cursor: pointer;
+  touch-action: manipulation;
+
+  font: inherit;
+  font-size: 14px;
+
+  color: #b91c1c;
+
+  padding: 10px 12px;
+  border-radius: 8px;
+
+  text-align: left;
+}
+
+.dropdown-item:hover {
+  background: #fdecec;
+}
+
+/* Focus */
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+/* Desktop Sidebar Collapse */
+
+@media (min-width: 901px) {
+
+  .shell.collapsed {
+    grid-template-columns: 0 1fr;
+  }
+
+  .shell.collapsed .sidebar {
+    padding: 0;
+    visibility: hidden;
+  }
+
+}
+
+/* Tablet and Mobile */
+
+@media (max-width: 900px) {
+
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: fixed;
+
+    inset: 0 auto 0 0;
+
+    /* top/bottom (inset) se height aati hai, isliye auto.
+       Pehle 100vh tha, jisse mobile par neeche ka hissa kat jata tha. */
+    height: auto;
+
+    width: 270px;
+    max-width: 85vw;
+
+    z-index: 50;
+
+    /* notch / home bar wale phones ke liye safe-area */
+    padding-top: max(20px, env(safe-area-inset-top, 0px));
+    padding-bottom: max(20px, env(safe-area-inset-bottom, 0px));
+    padding-left: max(14px, env(safe-area-inset-left, 0px));
+
+    transform: translateX(-100%);
+
+    /* band hone par keyboard/screen-reader se bhi chhup jaye */
+    visibility: hidden;
+
+    transition: transform .25s ease, visibility 0s linear .25s;
+  }
+
+  .shell.open .sidebar {
+    transform: none;
+    visibility: visible;
+
+    box-shadow: 8px 0 30px rgba(8, 16, 40, .35);
+
+    transition: transform .25s ease, visibility 0s;
+  }
+
+  .backdrop {
+    display: block;
+
+    position: fixed;
+    inset: 0;
+
+    z-index: 40;
+
+    background: rgba(8, 16, 40, .5);
+
+    opacity: 0;
+    pointer-events: none;
+
+    transition: opacity .25s ease;
+  }
+
+  .shell.open .backdrop {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .topbar {
+    padding-left: max(20px, env(safe-area-inset-left, 0px));
+    padding-right: max(20px, env(safe-area-inset-right, 0px));
+  }
+
+  .user-text,
+  .user .chev {
+    display: none;
+  }
+
+}
+
+/* Small Mobile */
+
+@media (max-width: 520px) {
+
+  .topbar {
+    padding-left: max(10px, env(safe-area-inset-left, 0px));
+    padding-right: max(10px, env(safe-area-inset-right, 0px));
+    height: 62px;
+  }
+
+  .content {
+    padding: 12px 12px calc(20px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .avatar {
+    width: 38px;
+    height: 38px;
+  }
+
+}
+
+/* Landscape phones / short screens */
+
+@media (max-height: 500px) {
+
+  .topbar {
+    height: 56px;
+  }
+
+  .sidebar {
+    gap: 14px;
+  }
+
+  .promo {
+    min-height: 0;
+    padding: 14px 12px;
+  }
+
+  .content {
+    padding-top: 12px;
+    gap: 12px;
+  }
+
+}
+
+/* Reduced Motion */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .shell,
+  .sidebar,
+  .backdrop,
+  .chev,
+  .nav-item {
+    transition: none;
+  }
+
+}

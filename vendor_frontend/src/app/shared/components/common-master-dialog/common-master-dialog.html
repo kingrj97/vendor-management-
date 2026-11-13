@@ -1,0 +1,106 @@
+<div class="backdrop" (click)="close()">
+
+  <div class="dialog" [class.fullscreen]="fullscreen" (click)="$event.stopPropagation()">
+
+    <!-- HEADER -->
+    <div class="dialog-header">
+      <h2>{{ title }}</h2>
+
+      <div class="header-actions">
+        <div class="search-box">
+          <input type="text" placeholder="Search here..." [(ngModel)]="search" autocomplete="off">
+          <span class="search-icon">&#9906;</span>
+        </div>
+
+        <button type="button" class="icon-btn" title="Fullscreen" (click)="fullscreen = !fullscreen">
+          {{ fullscreen ? '⤡' : '⛶' }}
+        </button>
+
+        <button type="button" class="icon-btn" title="Close" (click)="close()">✕</button>
+      </div>
+    </div>
+
+
+    <div class="dialog-body">
+
+      <!-- FORM ROW -->
+      <div class="form-row">
+        <div class="field">
+          <input type="text" [(ngModel)]="name" maxlength="100" [placeholder]="title + '*'" autocomplete="off"
+            (keydown.enter)="save()" (input)="error = ''">
+        </div>
+      </div>
+
+      @if (error) {
+        <p class="error">{{ error }}</p>
+      }
+
+      <div class="form-buttons">
+        <button type="button" class="btn-light" (click)="reset()">Reset</button>
+        <button type="button" class="btn-primary" [disabled]="saving" (click)="save()">
+          {{ saving ? 'Saving...' : (editingId ? 'Update' : 'Create') }}
+        </button>
+      </div>
+
+
+      <!-- TABLE -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>{{ title }}</th>
+              <th class="col-action">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @if (loading) {
+              <tr><td colspan="2" class="empty">Loading...</td></tr>
+            } @else if (!filtered.length) {
+              <tr><td colspan="2" class="empty">No results found</td></tr>
+            }
+
+            @for (item of filtered; track item.id) {
+              <tr [class.editing]="editingId === item.id">
+                <td>{{ item.name }}</td>
+
+                <td class="col-action">
+                  <button type="button" class="kebab" (click)="toggleMenu(item.id, $event)">⋮</button>
+
+                  @if (menuId === item.id) {
+                    <div class="row-menu">
+                      <button type="button" (click)="edit(item)">Edit</button>
+                      <button type="button" class="danger" (click)="askDelete(item)">Delete</button>
+                    </div>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+
+    <!-- FOOTER -->
+    <div class="dialog-footer">
+      <button type="button" class="btn-light" (click)="close()">Close</button>
+    </div>
+
+
+    <!-- DELETE CONFIRM -->
+    @if (deleteId) {
+      <div class="confirm-backdrop">
+        <div class="confirm">
+          <p>Delete this {{ title }}? This cannot be undone.</p>
+          <div class="confirm-actions">
+            <button type="button" class="btn-light" (click)="cancelDelete()">Cancel</button>
+            <button type="button" class="btn-danger" (click)="confirmDelete()">Delete</button>
+          </div>
+        </div>
+      </div>
+    }
+
+  </div>
+</div>
