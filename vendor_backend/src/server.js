@@ -1,9 +1,8 @@
+const path = require("path");
 const dotenv = require("dotenv");
 
 // .env sabse pehle load karo, db.js import hone se pehle
-dotenv.config();
-
-const path = require("path");
+dotenv.config({ path: path.resolve(__dirname, "..", ".env") });
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -13,6 +12,7 @@ const multer = require("multer");
 const pool = require("./db");
 const auth = require("./middleware/auth.middleware");
 const vendorRoutes = require("./routes/vendor.routes");
+const authRoutes = require("./routes/auth.routes");
 
 const app = express();
 const PORT = Number(process.env.PORT) || 5000;
@@ -37,8 +37,9 @@ if (IS_PRODUCTION) {
 }
 
 // Comma se alag multiple origins: https://a.com,https://www.a.com
+const defaultOrigins = "http://localhost:4200,http://localhost:8000,http://localhost:5004,http://localhost:5005";
 const allowedOrigins = String(
-  process.env.CORS_ORIGIN || "http://localhost:4200"
+  process.env.CORS_ORIGIN || defaultOrigins
 )
   .split(",")
   .map(origin => origin.trim())
@@ -183,6 +184,10 @@ app.get("/api/health", async (req, res) => {
     });
   }
 });
+
+// Central auth routes (compatible with PMS & Zydus Admin)
+app.use("/api/auth", authRoutes);
+app.use("/auth", authRoutes);
 
 // Vendor routes
 app.use("/api/vendors", vendorRoutes);

@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 
 import { Vendors } from '../vendors/vendors';
 import { VendorService } from '../../../core/services/vendor.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 type ViewKey = 'vendors';
 
@@ -28,6 +29,7 @@ export class VendorDashboard {
 
   private router = inject(Router);
   private vendorService = inject(VendorService);
+  public authService = inject(AuthService);
 
   // =====================================
   // DEFAULT PAGE
@@ -151,24 +153,8 @@ export class VendorDashboard {
   // phir local data saaf karo. Backend fail ho to bhi user ko
   // logout karke login page par bhej do.
   logout(): void {
-
     this.menuOpen.set(false);
-
-    const finish = (): void => {
-
-      localStorage.clear();
-
-      sessionStorage.clear();
-
-      this.router.navigate(['/login']);
-
-    };
-
-    this.vendorService.logout().subscribe({
-      next: finish,
-      error: finish
-    });
-
+    this.authService.logout();
   }
 
 }

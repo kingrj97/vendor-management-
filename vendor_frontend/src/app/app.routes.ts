@@ -14,29 +14,33 @@ import { guestGuard } from './core/guards/guard';
 
 export const routes: Routes = [
 
-  // Default route
+  // Default route (authenticated through central admin)
   {
     path: '',
-    redirectTo: 'register',
+    redirectTo: 'vendor-portal',
     pathMatch: 'full'
   },
 
-  // Login page
+  // Central Admin Login redirect (replaces local app login)
   {
     path: 'login',
-    component: Login,
-    canActivate: [guestGuard]
+    canActivate: [() => {
+      if (typeof window !== 'undefined') {
+        window.location.replace('http://localhost:8000/zydus-app/login');
+      }
+      return false;
+    }],
+    component: Login
   },
 
-  // Vendor Registration
+  // Vendor Registration (for new vendor onboarding)
   {
     path: 'register',
     component: VendorRegistration,
     canActivate: [guestGuard]
   },
 
-  // OTP Verification
-  // Register, Update and Renew tino ke liye
+  // OTP Verification (Register, Update and Renew)
   {
     path: 'otp-verification',
     component: OtpVerificationComponent,
@@ -44,8 +48,6 @@ export const routes: Routes = [
   },
 
   // Dashboard (admin/purchaser)
-  // Login zaroori. Data backend me requireAdmin se bhi protected hai.
-  // TODO: authGuard ke saath adminGuard bhi lagao (user.is_admin === 1 check).
   {
     path: 'dashboard',
     canActivate: [authGuard],
@@ -55,8 +57,6 @@ export const routes: Routes = [
   },
 
   // Vendor Portal
-  // FIX: canActivateChild hata diya. Parent par canActivate ek baar kaafi hai,
-  // warna har child navigation par /me dobara call hota tha.
   {
     path: 'vendor-portal',
     component: VendorPortal,
@@ -82,7 +82,7 @@ export const routes: Routes = [
   // Wildcard route - always last
   {
     path: '**',
-    redirectTo: 'register'
+    redirectTo: 'vendor-portal'
   }
 
 ];
