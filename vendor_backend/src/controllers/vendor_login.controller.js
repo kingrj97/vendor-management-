@@ -57,9 +57,13 @@ async function sendLoginOtp(req, res, next) {
     );
     const vendor = vendorResult.rows[0];
 
-    // Unregistered number: SMS mat bhejo, par response same do (no enumeration)
+    // Unregistered number: not registered error for redirecting to registration
     if (!vendor) {
-      return res.status(200).json(GENERIC_SEND_RESPONSE);
+      return res.status(404).json({
+        success: false,
+        not_registered: true,
+        message: "This number is not registered. Redirecting to registration..."
+      });
     }
 
     // Resend cooldown
@@ -161,9 +165,13 @@ async function verifyLoginOtp(req, res, next) {
       message: "Invalid or expired OTP. Please request a new OTP."
     };
 
-    // Unregistered number par bhi same error (no enumeration)
+    // Unregistered number
     if (!vendor) {
-      return res.status(400).json(INVALID);
+      return res.status(404).json({
+        success: false,
+        not_registered: true,
+        message: "This number is not registered. Please register first."
+      });
     }
 
     // Latest valid OTP

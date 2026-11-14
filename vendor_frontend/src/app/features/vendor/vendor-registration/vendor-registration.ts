@@ -356,6 +356,10 @@ export class VendorRegistration implements OnInit {
 
     // Registration mode
     if (!this.isRenew && !this.isUpdate) {
+      const mobileParam = this.route.snapshot.queryParamMap.get('mobile');
+      if (mobileParam && /^[0-9]{10}$/.test(mobileParam)) {
+        this.vendor.mobile_no = mobileParam;
+      }
       this.openMaster('category');
       this.openMaster('site');
       return;
