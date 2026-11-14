@@ -150,7 +150,9 @@ export class Login implements OnDestroy {
 
           this.redirectTimer = setTimeout(() => {
 
-            this.router.navigate(['/register']);
+            this.router.navigate(['/register'], {
+              queryParams: { mobile: this.mobile }
+            });
 
           }, 1500);
 
@@ -335,7 +337,15 @@ export class Login implements OnDestroy {
 
         if (err?.error?.not_registered) {
 
-          this.router.navigate(['/register']);
+          this.message.set(
+            'This number is not registered. Redirecting to registration...'
+          );
+
+          this.redirectTimer = setTimeout(() => {
+            this.router.navigate(['/register'], {
+              queryParams: { mobile: this.mobile }
+            });
+          }, 1500);
 
           return;
         }
