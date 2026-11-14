@@ -616,7 +616,7 @@ export class Vendors implements OnInit, OnDestroy {
   // FILE PREVIEW (opens from the details popup)
   // =========================================================
 
-  private readonly fileBase = 'http://localhost:5000/uploads/';
+  private readonly fileBase = 'http://localhost:5001/uploads/';
 
   private sourceFor(v: Vendor, key: ColKey): { url: string; name: string; isPdf: boolean } | null {
     const p = (v[key] as string) ?? '';

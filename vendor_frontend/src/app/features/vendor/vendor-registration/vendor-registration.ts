@@ -119,7 +119,7 @@ export class VendorRegistration implements OnInit {
 
   existingFiles: { [key: string]: string } = {};
 
-  private readonly fileBase = 'http://localhost:5000/uploads/';
+  private readonly fileBase = 'http://localhost:5001/uploads/';
 
   openDropdown: string | null = null;
 

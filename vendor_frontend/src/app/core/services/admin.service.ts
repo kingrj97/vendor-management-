@@ -44,7 +44,7 @@ export interface VendorStatusResult {
 })
 export class MasterService {
 
-  private readonly base = 'http://localhost:5000/api/vendors';
+  private readonly base = 'http://localhost:5001/api/vendors';
 
   private readonly paths: Record<MasterKey, string> = {
     category: 'categories',
