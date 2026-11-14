@@ -195,6 +195,16 @@ textarea {
   overflow-wrap: anywhere;
 }
 
+.form-grid>label>.label-text,
+.form-grid>.field>.label-text {
+  min-height: 38px;
+}
+
+.form-grid>label.full>.label-text,
+.form-grid>.field.full>.label-text {
+  min-height: auto;
+}
+
 /* ==========================================
    TEXT INPUTS AND TEXTAREA
    ========================================== */
@@ -203,7 +213,7 @@ textarea {
 .form-section textarea {
   width: 100%;
   min-width: 0;
-  min-height: 43px;
+  min-height: 46px;
   padding: 10px 12px;
   background: #ffffff;
   color: #263449;
@@ -1106,7 +1116,7 @@ small.server-error {
 /* admin wrapper: leave room on top so it lines up with the
    neighbouring fields that have a label above the input */
 .master-wrap.admin-select {
-  margin-top: 24px;
+  margin-top: 45px;
 }
 
 /* floating label sitting on the top border */
@@ -1409,6 +1419,11 @@ small.server-error {
 
   .label-text {
     font-size: 12.5px;
+  }
+
+  .form-grid>label>.label-text,
+  .form-grid>.field>.label-text {
+    min-height: auto;
   }
 
   .dropdown-trigger,
