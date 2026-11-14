@@ -202,8 +202,6 @@ export class VendorRegistration implements OnInit {
 
   message = '';
 
-  formProgress = 0;
-
   isSubmitting = false;
 
 
@@ -1889,8 +1887,6 @@ export class VendorRegistration implements OnInit {
     this.companyRegistrationTouched = false;
 
     this.message = '';
-
-    this.formProgress = 0;
 
     this.isSubmitting = false;
 
