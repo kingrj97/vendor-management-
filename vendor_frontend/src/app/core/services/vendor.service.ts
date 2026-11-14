@@ -10,7 +10,7 @@ export type OtpMode = 'register' | 'renew' | 'update';
 })
 export class VendorService {
 
-  private readonly apiBaseUrl = 'http://localhost:5000/api';
+  private readonly apiBaseUrl = 'http://localhost:5001/api';
 
   // Login ab HttpOnly cookie (vendor_token) se chalta hai.
   // withCredentials: true ke bina browser cookie na save karta hai na bhejta hai.

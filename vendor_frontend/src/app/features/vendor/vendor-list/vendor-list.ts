@@ -168,7 +168,7 @@ export interface Section {
 
 export class VendorListComponent implements OnInit, OnDestroy {
 
-  private readonly fileBase = 'http://localhost:5000/uploads/';
+  private readonly fileBase = 'http://localhost:5001/uploads/';
 
 
   // ============================================================
