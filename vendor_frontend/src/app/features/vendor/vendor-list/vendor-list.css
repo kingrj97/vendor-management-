@@ -299,6 +299,14 @@ textarea {
   overflow-wrap: anywhere;
 }
 
+.form-grid > .field > .label-text {
+  min-height: 38px;
+}
+
+.form-grid > .field.full > .label-text {
+  min-height: auto;
+}
+
 
 /* ==================================================
    11. READONLY BOX
@@ -309,7 +317,7 @@ textarea {
   align-items: center;
   width: 100%;
   min-width: 0;
-  min-height: 43px;
+  min-height: 46px;
   padding: 10px 12px;
   background: #f1f3f6;
   color: #6b7789;
@@ -628,6 +636,10 @@ textarea {
 
   .label-text {
     font-size: 12.5px;
+  }
+
+  .form-grid > .field > .label-text {
+    min-height: auto;
   }
 
   .readonly-box {
